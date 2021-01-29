@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>test</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body onload="main()">
+  <canvas id="canvas" width="800" height="600"></canvas>
+  <div class="description">W, A, S, D: strafe, MOUSE DRAG: look, MOUSE SCROLL: move</div>
+  <div class="description">R: reset, P: pause</div>
+  <div class="label">time factor: </div>
+  <input class="input time_text" type="text" id="tf_text" value="1.0"/>
+  <input class="input" type="range" id="tf_range" value="1.0" min=".1" max="2" step=".01"/>
+  <script id="v_ball" type="glsl">
+    precision mediump float;
+
+    attribute vec4 a_Position;
+    attribute vec4 a_Color;
+
+    uniform mat4 u_ModelMatrix;
+    uniform mat4 u_ViewMatrix;
+    uniform mat4 u_ProjMatrix;
+
+    varying vec4 v_Color;
+
+    void main(){
+      gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;
+      gl_PointSize = 70.0/gl_Position.w;
+      v_Color = vec4(a_Color.xyz, 1.0);
+    }
+  </script>
+  <script id="f_ball" type="glsl">
+    precision mediump float;
+
+    uniform int u_Point;
+
+    varying vec4 v_Color;
+
+    void main(){
+      if(u_Point == 1){
+        float d = distance(gl_PointCoord, vec2(0.5, 0.5));
+        if(d < 0.5){
+          gl_FragColor = vec4((1.0-2.0*d)*v_Color.xyz, 1.0);
+        }
+        else{
+          discard;
+        }
+      }
+      else{
+        gl_FragColor = v_Color;
+      }
+    }
+  </script>
+  <script src="lib/webgl-utils.js"></script>
+  <script src="lib/webgl-debug.js"></script>
+  <script src="lib/cuon-utils.js"></script>
+  <script src="lib/cuon-matrix-quat.js"></script> 
+  <script src="partsys.js"></script>
+  <script src="camera.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

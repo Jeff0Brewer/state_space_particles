@@ -1,0 +1,27 @@
+body{
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: Arial;
+	font-size: 15px;
+}
+
+.description{
+	margin: 10px;
+}
+
+.label{
+	float: left;
+	margin-right: 5px;
+	margin-left: 10px;
+}
+
+.time_text{
+	float: left;
+	margin: 0 2px 0 2px;
+	width: 30px;
+}
+
+.input{
+	float: left;
+}
