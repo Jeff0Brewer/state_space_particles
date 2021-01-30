@@ -14,7 +14,7 @@ function main(){
 
 	cam = new CameraController([-15, -10, 5], [0, 0, 2], 1.25, .01);
 
-	let num_particle = 10000;
+	let num_particle = 1000;
 	F = [
 		new GravityForcer(-9.8, num_particle),
 		new DragForcer(.5, num_particle)
@@ -23,10 +23,10 @@ function main(){
 	// 	F.push(new SpringForcer(.25, 100, 100, i, i + 1)); 
 	// }
 	C = [
-		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 5, 8], 2, 5, .5, num_particle),
-		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -5, 6], 2, 5, .5, num_particle),
-		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 5, 4], 2, 5, .5, num_particle),
-		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -5, 2], 2, 5, .5, num_particle),
+		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 4, 8], 2, 5, .5, num_particle),
+		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -4, 6], 2, 5, .5, num_particle),
+		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 4, 4], 2, 5, .5, num_particle),
+		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -4, 2], 2, 5, .5, num_particle),
 
 		new AxisConstraint(0, -10, .85, num_particle),
 		new AxisConstraint(0, 10, .85, num_particle),
@@ -197,6 +197,14 @@ function key_up(e){
 		case 'D':
 			cam.add_strafe([-1, 0]);
 			break;
+	}
+}
+
+document.getElementById('launch_spd').value = init.speed.toFixed(1);
+document.getElementById('launch_spd').onchange = function(){
+	let value = parseFloat(this.value);
+	if(!Number.isNaN(value)){
+		init.speed = value;
 	}
 }
 

@@ -235,16 +235,16 @@ class FixConstraint{
 }
 
 class WallConstraint{
-	constructor(normal, orientation, point, width, height, coeff, num){
+	constructor(normal, orientation, center, width, height, coeff, num){
 		this.n = norm(normal);
 		this.dir = {
 			x: norm(orientation),
 			y: norm(cross3(normal, orientation))
 		}
-		this.p = point;
+		this.p = center;
 		this.w = width;
 		this.h = height;
-		this.constants = normal.concat([-normal[0]*point[0] - normal[1]*point[1] - normal[2]*point[2]]);
+		this.constants = normal.concat([-normal[0]*center[0] - normal[1]*center[1] - normal[2]*center[2]]);
 		this.c = -1*Math.abs(coeff);
 		this.num = num;
 
@@ -258,7 +258,7 @@ class WallConstraint{
 			if(dist_point_plane(p1, this.constants) >= 0 && dist_point_plane(p2, this.constants) < 0){
 				let p = add(p1, mult_scalar(this.n, -1*dist_point_plane(p1, this.constants)));
 				let p_rel = sub(p, this.p);
-				if(Math.abs(dot(p_rel, this.dir.x)) < this.w && Math.abs(dot(p_rel, this.dir.y)) < this.h){
+				if(Math.abs(dot(p_rel, this.dir.x)) <= this.w && Math.abs(dot(p_rel, this.dir.y)) <= this.h){
 					let v = s1.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
 					let v_perp = mult_scalar(this.n, dot(v, this.n));
 					v = add(sub(v, v_perp), mult_scalar(v_perp, this.c));
@@ -352,5 +352,5 @@ function map(v, a, b){
 
 //find distance between point and plane
 function dist_point_plane(pt, cnst){
-	return (cnst[0]*pt[0] + cnst[1]*pt[1] + cnst[2]*pt[2] + cnst[3])/Math.sqrt(Math.pow(cnst[0], 2) + Math.pow(cnst[1], 2) + Math.pow(cnst[2], 2));
+	return (cnst[0]*pt[0] + cnst[1]*pt[1] + cnst[2]*pt[2] + cnst[3])/Math.sqrt(cnst[0]*cnst[0] + cnst[1]*cnst[1] + cnst[2]*cnst[2]);
 }
