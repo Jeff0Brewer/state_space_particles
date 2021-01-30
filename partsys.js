@@ -235,8 +235,15 @@ class FixConstraint{
 }
 
 class WallConstraint{
-	constructor(normal, point, coeff, num){
+	constructor(normal, orientation, point, width, height, coeff, num){
 		this.n = norm(normal);
+		this.dir = {
+			x: norm(orientation),
+			y: norm(cross3(normal, orientation))
+		}
+		this.p = point;
+		this.w = width;
+		this.h = height;
 		this.constants = normal.concat([-normal[0]*point[0] - normal[1]*point[1] - normal[2]*point[2]]);
 		this.c = -1*Math.abs(coeff);
 		this.num = num;
@@ -250,12 +257,15 @@ class WallConstraint{
 			let p2 = s2.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
 			if(dist_point_plane(p1, this.constants) >= 0 && dist_point_plane(p2, this.constants) < 0){
 				let p = add(p1, mult_scalar(this.n, -1*dist_point_plane(p1, this.constants)));
-				let v = s1.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
-				let v_perp = mult_scalar(this.n, dot(v, this.n));
-				v = add(sub(v, v_perp), mult_scalar(v_perp, this.c));
-				for(let i = 0; i < 3; i++){
-					s2[n*IND.FPP + IND.POS + i] = p[i];
-					s2[n*IND.FPP + IND.VEL + i] = v[i];
+				let p_rel = sub(p, this.p);
+				if(Math.abs(dot(p_rel, this.dir.x)) < this.w && Math.abs(dot(p_rel, this.dir.y)) < this.h){
+					let v = s1.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
+					let v_perp = mult_scalar(this.n, dot(v, this.n));
+					v = add(sub(v, v_perp), mult_scalar(v_perp, this.c));
+					for(let i = 0; i < 3; i++){
+						s2[n*IND.FPP + IND.POS + i] = p[i];
+						s2[n*IND.FPP + IND.VEL + i] = v[i];
+					}
 				}
 			}
 		}

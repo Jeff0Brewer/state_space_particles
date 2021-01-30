@@ -1,8 +1,8 @@
 let paused = false;
 let init = {
-	center: [0, 0, 5],
+	center: [0, 5, 10],
 	size: .5,
-	speed: 20
+	speed: 1
 }
 
 function main(){
@@ -14,21 +14,27 @@ function main(){
 
 	cam = new CameraController([-15, -10, 5], [0, 0, 2], 1.25, .01);
 
-	let num_particle = 50;
+	let num_particle = 5000;
 	F = [
-		// new GravityForcer(-1.62, num_particle),
+		new GravityForcer(-9.8, num_particle),
 		new DragForcer(.5, num_particle)
 	];
-	for(let i = 0; i < num_particle - 1; i++){
-		F.push(new SpringForcer(.25, 100, 100, i, i + 1)); 
-	}
+	// for(let i = 0; i < num_particle - 1; i++){
+	// 	F.push(new SpringForcer(.25, 100, 100, i, i + 1)); 
+	// }
 	C = [
-		new WallConstraint([1, 0, 0], [-10, 0, 0], .85, num_particle),
-		new WallConstraint([-1, 0, 0], [10, 0, 0], .85, num_particle),
-		new WallConstraint([0, 1, 0], [0, -10, 0], .85, num_particle),
-		new WallConstraint([0, -1, 0], [0, 10, 0], .85, num_particle),
-		new WallConstraint([0, 0, 1], [0, 0, 0], .85, num_particle),
-		new WallConstraint([0, 0, -1], [0, 0, 10], .85, num_particle),
+		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 5, 8], 2, 5, .5, num_particle),
+		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -5, 6], 2, 5, .5, num_particle),
+		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 5, 4], 2, 5, .5, num_particle),
+		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -5, 2], 2, 5, .5, num_particle),
+
+
+		new WallConstraint([1, 0, 0], [0, 1, 0], [-10, 0, 0], 100, 100, .85, num_particle),
+		new WallConstraint([-1, 0, 0], [0, -1, 0], [10, 0, 0], 100, 100, .85, num_particle),
+		new WallConstraint([0, 1, 0], [1, 0, 0], [0, -10, 0], 100, 100, .85, num_particle),
+		new WallConstraint([0, -1, 0], [-1, 0, 0], [0, 10, 0], 100, 100, .85, num_particle),
+		new WallConstraint([0, 0, 1], [1, 0, 0], [0, 0, 0], 100, 100, .85, num_particle),
+		new WallConstraint([0, 0, -1], [-1, 0, 0], [0, 0, 15], 100, 100, .85, num_particle)
 	];
 	part_sys = new PartSys(num_particle);
 	part_sys.init(init.center, init.size, init.speed, [5, 10], F, C);

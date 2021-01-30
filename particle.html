@@ -25,7 +25,7 @@
 
     void main(){
       gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;
-      gl_PointSize = 70.0/gl_Position.w;
+      gl_PointSize = 60.0/gl_Position.w;
       v_Color = vec4(a_Color.xyz, 1.0);
     }
   </script>
