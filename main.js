@@ -14,7 +14,7 @@ function main(){
 
 	cam = new CameraController([-15, -10, 5], [0, 0, 2], 1.25, .01);
 
-	let num_particle = 5000;
+	let num_particle = 10000;
 	F = [
 		new GravityForcer(-9.8, num_particle),
 		new DragForcer(.5, num_particle)
@@ -28,20 +28,19 @@ function main(){
 		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 5, 4], 2, 5, .5, num_particle),
 		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -5, 2], 2, 5, .5, num_particle),
 
-
-		new WallConstraint([1, 0, 0], [0, 1, 0], [-10, 0, 0], 100, 100, .85, num_particle),
-		new WallConstraint([-1, 0, 0], [0, -1, 0], [10, 0, 0], 100, 100, .85, num_particle),
-		new WallConstraint([0, 1, 0], [1, 0, 0], [0, -10, 0], 100, 100, .85, num_particle),
-		new WallConstraint([0, -1, 0], [-1, 0, 0], [0, 10, 0], 100, 100, .85, num_particle),
-		new WallConstraint([0, 0, 1], [1, 0, 0], [0, 0, 0], 100, 100, .85, num_particle),
-		new WallConstraint([0, 0, -1], [-1, 0, 0], [0, 0, 15], 100, 100, .85, num_particle)
+		new AxisConstraint(0, -10, .85, num_particle),
+		new AxisConstraint(0, 10, .85, num_particle),
+		new AxisConstraint(1, -10, .85, num_particle),
+		new AxisConstraint(1, 10, .85, num_particle),
+		new AxisConstraint(2, -.05, .85, num_particle),
+		new AxisConstraint(2, 20, .85, num_particle)
 	];
 	part_sys = new PartSys(num_particle);
 	part_sys.init(init.center, init.size, init.speed, [5, 10], F, C);
 
 	let grid_size = 75;
 	let s = 1.0;
-	let z = -.05;
+	let z = -.1;
 	let sq = [0, 0, z, 0, s, z, s, s, z, s, s, z, 0, 0, z, s, 0, z];
 	let sq_ind = 0;
 	let grid = [];

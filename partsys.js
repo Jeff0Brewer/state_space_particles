@@ -272,6 +272,27 @@ class WallConstraint{
 	}
 }
 
+class AxisConstraint{
+	constructor(axis_ind, offset, coeff, num){
+		this.ind = axis_ind;
+		this.off = offset;
+		this.coeff = coeff;
+		this.num = num;
+
+		this.data_len = 0;
+	}
+
+	constrain(s1, s2){
+		for(let n = 0; n < this.num; n++){
+			if((this.off > 0 && s1[n*IND.FPP + IND.POS + this.ind] <= this.off && s2[n*IND.FPP + IND.POS + this.ind] > this.off) || 
+			   (this.off < 0 && s1[n*IND.FPP + IND.POS + this.ind] >= this.off && s2[n*IND.FPP + IND.POS + this.ind] < this.off)){
+				s2[n*IND.FPP + IND.POS + this.ind] = this.off;
+				s2[n*IND.FPP + IND.VEL + this.ind] = -this.coeff*s1[n*IND.FPP + IND.VEL + this.ind];
+			}
+		}
+	}
+}
+
 //multiply vector by scalar
 function mult_scalar(vec, s){ 
 	let o = vec.slice();
