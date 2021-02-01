@@ -102,8 +102,6 @@ class PartSys{
 		}
 
 		let FC = this.F.concat(this.C);
-		let tri = [];
-		let lin = [];
 		let tri_ind = this.num*3;
 		let lin_ind = this.num*3 + this.FC_num.tri*3;
 		for(let i = 0; i < FC.length; i++){
