@@ -12,9 +12,9 @@ function main(){
 	gl.enable(gl.DEPTH_TEST);
 	gl.clearColor(0, 0, 0, 1);
 
-	cam = new CameraController([-15, -10, 5], [0, 0, 2], 1.25, .01);
+	cam = new CameraController([-9, -7, 9], [0, 0, 4], 1.25, .01);
 
-	let num_particle = 1000;
+	let num_particle = 3000;
 	F = [
 		new GravityForcer(-9.8, num_particle),
 		new DragForcer(.5, num_particle)
@@ -23,10 +23,10 @@ function main(){
 	// 	F.push(new SpringForcer(.25, 100, 100, i, i + 1)); 
 	// }
 	C = [
-		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 4, 8], 2, 5, .5, num_particle),
-		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -4, 6], 2, 5, .5, num_particle),
-		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 4, 4], 2, 5, .5, num_particle),
-		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -4, 2], 2, 5, .5, num_particle),
+		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 8], 2, 4, .5, num_particle),
+		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -3, 6], 2, 4, .5, num_particle),
+		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 4], 2, 4, .5, num_particle),
+		new WallConstraint([-.35, 0, 1], [0, 1, 0], [0, -3.5, 2], 2, 2, .5, num_particle),
 
 		new AxisConstraint(0, -10, .85, num_particle),
 		new AxisConstraint(0, 10, .85, num_particle),
@@ -52,24 +52,25 @@ function main(){
 			}
 		}
 	}
-	pos_buf = new Float32Array(part_sys.num*3 + part_sys.FC_data_num*3 + grid.length);
-	col_buf = new Float32Array(part_sys.num*3 + part_sys.FC_data_num*3 + grid.length);
+	pos_buf = new Float32Array(part_sys.num*3 + part_sys.FC_num.all*3 + grid.length);
+	col_buf = new Float32Array(part_sys.num*4 + part_sys.FC_num.all*4 + grid.length);
 	for(let i = 0; i < grid.length; i++){
-		pos_buf[(part_sys.num + part_sys.FC_data_num)*3 + i] = grid[i];
+		pos_buf[(part_sys.num + part_sys.FC_num.all)*3 + i] = grid[i];
 	}
+	let col_ind = 0;
 	let color = [];
-	for(let i = 0; i < part_sys.num*3; i++){
+	for(let i = 0; i < part_sys.num*3; i++, col_ind++){
 		if(i % 3 == 0){
 			color = [.5, .5, .5];
 			color[Math.floor(Math.random()*3)] = 1;
 		}
-		col_buf[i] = color[i % 3];
+		col_buf[col_ind] = color[i % 3];
 	}
-	for(let i = 0; i < part_sys.FC_data_num*3; i++){
-		col_buf[part_sys.num*3 + i] = 1;
+	for(let i = 0; i < part_sys.FC_num.all*3; i++, col_ind++){
+		col_buf[col_ind] = 1;
 	}
-	for(let i = 0; i < grid.length; i++){
-		col_buf[(part_sys.num + part_sys.FC_data_num)*3 + i] = .2*(Math.floor(i/sq.length) % 2);
+	for(let i = 0; i < grid.length; i++, col_ind++){
+		col_buf[col_ind] = .2*(Math.floor(i/sq.length) % 2);
 	}
 
 	fsize = pos_buf.BYTES_PER_ELEMENT;
@@ -151,10 +152,13 @@ function draw(gl){
 	gl.drawArrays(gl.POINTS, 0, part_sys.num);
 
 	gl.uniform1i(u_Point, 0);
-	if(part_sys.FC_data_num > 0){
-		gl.drawArrays(gl.LINES, part_sys.num, part_sys.FC_data_num);
+	if(part_sys.FC_num.tri > 0){
+		gl.drawArrays(gl.TRIANGLES, part_sys.num, part_sys.FC_num.tri);
 	}
-	gl.drawArrays(gl.TRIANGLES, part_sys.num + part_sys.FC_data_num, (pos_buf.length - (part_sys.num + part_sys.FC_data_num)*3)/3);
+	if(part_sys.FC_num.lin > 0){
+		gl.drawArrays(gl.LINES, part_sys.num + part_sys.FC_num.tri, part_sys.FC_num.lin);
+	}
+	gl.drawArrays(gl.TRIANGLES, part_sys.num + part_sys.FC_num.all, (pos_buf.length - (part_sys.num + part_sys.FC_num.all)*3)/3);
 }
 
 function key_down(e){

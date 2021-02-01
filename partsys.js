@@ -40,14 +40,21 @@ class PartSys{
 			this.s2[i] = this.s1[i];
 		}
 
-		let FC_data_len = 0;
+		let FC_tri_len = 0;
+		let FC_lin_len = 0;
 		for(let i = 0; i < this.F.length; i++){
-			FC_data_len += this.F[i].data_len;
+			FC_tri_len += this.F[i].data_len != 0 ? this.F[i].data_len[0] : 0;
+			FC_lin_len += this.F[i].data_len != 0 ? this.F[i].data_len[1] : 0;
 		}
 		for(let i = 0; i < this.C.length; i++){
-			FC_data_len += this.C[i].data_len;
+			FC_tri_len += this.C[i].data_len != 0 ? this.C[i].data_len[0] : 0;
+			FC_lin_len += this.C[i].data_len != 0 ? this.C[i].data_len[1] : 0;
 		}
-		this.FC_data_num = FC_data_len/3;
+		this.FC_num = {
+			tri: FC_tri_len/3,
+			lin: FC_lin_len/3,
+			all: (FC_tri_len + FC_lin_len)/3
+		};
 	}
 
 	applyAllForces(s, F){
@@ -86,25 +93,29 @@ class PartSys{
 	}
 
 	render(gl, gl_buf){
-		let pos_buf = new Float32Array(this.num*3 + this.FC_data_num*3);
+		let pos_buf = new Float32Array(this.num*3 + this.FC_num.all*3);
 		let pos_ind = 0;
 		for(let n = 0; n < this.num; n++){
 			for(let i = 0; i < 3; i++, pos_ind++){
 				pos_buf[pos_ind] = this.s2[n*IND.FPP + IND.POS + i];
 			}
 		}
-		for(let i = 0; i < this.F.length; i++){
-			let data = this.F[i].data_len > 0 ? this.F[i].get_buf_data(this.s2) : [];
-			for(let j = 0; j < data.length; j++, pos_ind++){
-				pos_buf[pos_ind] = data[j];
+
+		let FC = this.F.concat(this.C);
+		let tri = [];
+		let lin = [];
+		let tri_ind = this.num*3;
+		let lin_ind = this.num*3 + this.FC_num.tri*3;
+		for(let i = 0; i < FC.length; i++){
+			let data = FC[i].data_len != 0 ? FC[i].get_buf_data(this.s2) : [[], []];
+			for(let j = 0; j < data[0].length; j++, tri_ind++){
+				pos_buf[tri_ind] = data[0][j];
+			}
+			for(let j = 0; j < data[1].length; j++, lin_ind++){
+				pos_buf[lin_ind] = data[1][j];
 			}
 		}
-		for(let i = 0; i < this.C.length; i++){
-			let data = this.C[i].data_len > 0 ? this.C[i].get_buf_data(this.s2) : [];
-			for(let j = 0; j < data.length; j++, pos_ind++){
-				pos_buf[pos_ind] = data[j];
-			}
-		}
+		
 		gl.bindBuffer(gl.ARRAY_BUFFER, gl_buf);
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, pos_buf);
 	}
@@ -121,7 +132,7 @@ class SpringForcer{
 		this.dmp = damping;
 		this.inds = [ind_a, ind_b];
 
-		this.data_len = 6;
+		this.data_len = [0, 6];
 	}
 
 	apply_force(s){
@@ -144,13 +155,13 @@ class SpringForcer{
 	}
 
 	get_buf_data(s){
-		let data = [];
+		let lin = [];
 		for(let i = 0; i < this.inds.length; i++){
 			for(let j = 0; j < 3; j++){
-				data.push(s[this.inds[i]*IND.FPP + IND.POS + j]);
+				lin.push(s[this.inds[i]*IND.FPP + IND.POS + j]);
 			}
 		}
-		return data;
+		return [[], lin];
 	}
 }
 
@@ -248,7 +259,19 @@ class WallConstraint{
 		this.c = -1*Math.abs(coeff);
 		this.num = num;
 
-		this.data_len = 0;
+		let points = [
+			add(add(this.p, mult_scalar(this.dir.x, this.w)), mult_scalar(this.dir.y, this.h)),
+			add(add(this.p, mult_scalar(this.dir.x, this.w)), mult_scalar(this.dir.y, -this.h)),
+			add(add(this.p, mult_scalar(this.dir.x, -this.w)), mult_scalar(this.dir.y, -this.h)),
+			add(add(this.p, mult_scalar(this.dir.x, -this.w)), mult_scalar(this.dir.y, this.h))
+		];
+		let lin = [];
+		let ind = [0, 1, 1, 2, 2, 3, 3, 0];
+		for(let i = 0; i < ind.length; i++){
+			lin = lin.concat(points[ind[i]]);
+		}
+		this.data = [[], lin];
+		this.data_len = [0, lin.length];
 	}
 
 	constrain(s1, s2){
@@ -269,6 +292,10 @@ class WallConstraint{
 				}
 			}
 		}
+	}
+
+	get_buf_data(s){
+		return this.data;
 	}
 }
 
