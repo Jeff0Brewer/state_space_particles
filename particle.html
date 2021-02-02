@@ -34,29 +34,50 @@
   <script id="f_ball" type="glsl">
     precision mediump float;
 
-    uniform int u_Point;
+    varying vec4 v_Color;
+
+    void main(){
+      float d = distance(gl_PointCoord, vec2(0.5, 0.5));
+      if(d < 0.5){
+        gl_FragColor = vec4((1.0-2.0*d)*v_Color.xyz, 1.0);
+      }
+      else{
+        discard;
+      }
+    }
+  </script>
+  <script id="v_simple" type="glsl">
+    precision mediump float;
+
+    attribute vec4 a_Position;
+    attribute vec4 a_Color;
+
+    uniform mat4 u_ModelMatrix;
+    uniform mat4 u_ViewMatrix;
+    uniform mat4 u_ProjMatrix;
 
     varying vec4 v_Color;
 
     void main(){
-      if(u_Point == 1){
-        float d = distance(gl_PointCoord, vec2(0.5, 0.5));
-        if(d < 0.5){
-          gl_FragColor = vec4((1.0-2.0*d)*v_Color.xyz, 1.0);
-        }
-        else{
-          discard;
-        }
-      }
-      else{
-        gl_FragColor = v_Color;
-      }
+      gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;
+      v_Color = vec4(a_Color.xyz, 1.0);
+    }
+  </script>
+  <script id="f_simple" type="glsl">
+    precision mediump float;
+
+    varying vec4 v_Color;
+
+    void main(){
+      gl_FragColor = v_Color;
     }
   </script>
   <script src="lib/webgl-utils.js"></script>
   <script src="lib/webgl-debug.js"></script>
   <script src="lib/cuon-utils.js"></script>
   <script src="lib/cuon-matrix-quat.js"></script> 
+  <script src="gl.js"></script>
+  <script src="drawer.js"></script>
   <script src="partsys.js"></script>
   <script src="camera.js"></script>
   <script src="main.js"></script>

@@ -7,17 +7,37 @@ let init = {
 
 function main(){
 	c = document.getElementById('canvas')
-	var gl = getWebGLContext(c);
-	initShaders(gl, document.getElementById('v_ball').text, document.getElementById('f_ball').text);
-	gl.enable(gl.DEPTH_TEST);
-	gl.clearColor(0, 0, 0, 1);
+	setup_gl(c);
 
 	cam = new CameraController([-9, -7, 9], [0, 0, 4], 1.25, .01);
 
-	let num_particle = 3000;
+	let grid_size = 75;
+	let s = 1.0;
+	let z = -.1;
+	let sq = [
+		0, 0, z, 0, 0, 0, 1,
+		0, s, z, 0, 0, 0, 1,
+		s, s, z, 0, 0, 0, 1,
+		s, s, z, 0, 0, 0, 1,
+		0, 0, z, 0, 0, 0, 1,
+		s, 0, z, 0, 0, 0, 1
+	];
+	let sq_ind = 0;
+	let grid = [];
+	for(let x = -grid_size/2*s; x < grid_size/2*s; x += s){
+		for(let y = -grid_size/2*s; y < grid_size/2*s; y += s, sq_ind++){
+			let b = .2*(sq_ind % 2);
+			let off = [x, y, 0, b, b, b, 0];
+			for(let i = 0; i < sq.length; i++){
+				grid.push(sq[i] + off[i % off.length]);
+			}
+		}
+	}
+
+	let num_particle = 2000;
 	F = [
 		new GravityForcer(-9.8, num_particle),
-		new DragForcer(.5, num_particle)
+		new DragForcer(.3, num_particle)
 	];
 	// for(let i = 0; i < num_particle - 1; i++){
 	// 	F.push(new SpringForcer(.25, 100, 100, i, i + 1)); 
@@ -38,69 +58,33 @@ function main(){
 	part_sys = new PartSys(num_particle);
 	part_sys.init(init.center, init.size, init.speed, [5, 10], F, C);
 
-	let grid_size = 75;
-	let s = 1.0;
-	let z = -.1;
-	let sq = [0, 0, z, 0, s, z, s, s, z, s, s, z, 0, 0, z, s, 0, z];
-	let sq_ind = 0;
-	let grid = [];
-	for(let x = -grid_size/2*s; x < grid_size/2*s; x += s){
-		for(let y = -grid_size/2*s; y < grid_size/2*s; y += s, sq_ind++){
-			let off = [x, y, 0];
-			for(let i = 0; i < sq.length; i++){
-				grid.push(sq[i] + off[i % 3]);
-			}
-		}
-	}
-	pos_buf = new Float32Array(part_sys.num*3 + part_sys.FC_num.all*3 + grid.length);
-	col_buf = new Float32Array(part_sys.num*4 + part_sys.FC_num.all*4 + grid.length);
-	for(let i = 0; i < grid.length; i++){
-		pos_buf[(part_sys.num + part_sys.FC_num.all)*3 + i] = grid[i];
-	}
-	let col_ind = 0;
-	let color = [];
-	for(let i = 0; i < part_sys.num*3; i++, col_ind++){
-		if(i % 3 == 0){
-			color = [.5, .5, .5];
-			color[Math.floor(Math.random()*3)] = 1;
-		}
-		col_buf[col_ind] = color[i % 3];
-	}
-	for(let i = 0; i < part_sys.FC_num.all*3; i++, col_ind++){
-		col_buf[col_ind] = 1;
-	}
-	for(let i = 0; i < grid.length; i++, col_ind++){
-		col_buf[col_ind] = .2*(Math.floor(i/sq.length) % 2);
-	}
-
-	fsize = pos_buf.BYTES_PER_ELEMENT;
-	var gl_col_buf = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, gl_col_buf);
-	gl.bufferData(gl.ARRAY_BUFFER, col_buf, gl.STATIC_DRAW);
-	var a_Color = gl.getAttribLocation(gl.program, 'a_Color');
-	gl.vertexAttribPointer(a_Color, 3, gl.FLOAT, false, 3*fsize, 0);
-	gl.enableVertexAttribArray(a_Color);
-
-	var gl_pos_buf = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, gl_pos_buf);
-	gl.bufferData(gl.ARRAY_BUFFER, pos_buf, gl.DYNAMIC_DRAW);
-	var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
-	gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 3*fsize, 0);
-	gl.enableVertexAttribArray(a_Position);
+	drawers = [
+		new Drawer([0, 1, 1], [part_sys.num, part_sys.FC_num.tri, part_sys.FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
+		new Drawer([1], [grid.length/7], [gl.TRIANGLES])
+	];
+	drawers[1].buffer_data(0, new Float32Array(grid));
 
 	var model_matrix = new Matrix4();
 	var view_matrix = new Matrix4();
 	var proj_matrix = new Matrix4();
 	view_matrix.setLookAt(cam.pos[0], cam.pos[1], cam.pos[2], cam.foc[0], cam.foc[1], cam.foc[2], 0, 0, 1);
 	proj_matrix.setPerspective(70, c.width/c.height, .01, 500);
-	u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-	u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
-	u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
-	u_Point = gl.getUniformLocation(gl.program, 'u_Point');
+	
+	u_ModelMatrix = [];
+	u_ViewMatrix = [];
+	u_ProjMatrix = [];
+	mvp_shaders = [0, 1];
+	for(let i = 0; i < mvp_shaders.length; i++){
+		switch_shader(mvp_shaders[i]);
+		u_ModelMatrix.push(gl.getUniformLocation(gl.program, 'u_ModelMatrix'));
+		u_ViewMatrix.push(gl.getUniformLocation(gl.program, 'u_ViewMatrix'));
+		u_ProjMatrix.push(gl.getUniformLocation(gl.program, 'u_ProjMatrix'));
+		
+		gl.uniformMatrix4fv(u_ModelMatrix[i], false, model_matrix.elements);
+		gl.uniformMatrix4fv(u_ViewMatrix[i], false, view_matrix.elements);
+		gl.uniformMatrix4fv(u_ProjMatrix[i], false, proj_matrix.elements);
+	}
 
-	gl.uniformMatrix4fv(u_ModelMatrix, false, model_matrix.elements);
-	gl.uniformMatrix4fv(u_ViewMatrix, false, view_matrix.elements);
-	gl.uniformMatrix4fv(u_ProjMatrix, false, proj_matrix.elements);
 
 	let last_t = Date.now();
 	var tick = function(){
@@ -110,17 +94,19 @@ function main(){
 
 		if(!paused && elapsed < 500){
 			part_sys.applyAllForces(part_sys.s1, part_sys.F);
-			part_sys.s1dot = part_sys.dotFinder(part_sys.s1);
 			part_sys.solver(elapsed);
 			part_sys.doConstraint(part_sys.s1, part_sys.s2, part_sys.C);
-			part_sys.render(gl, gl_pos_buf);
+			part_sys.render(drawers[0]);
 			part_sys.swap();
 		}
 		cam.strafe(elapsed);
 		view_matrix.setLookAt(cam.pos[0], cam.pos[1], cam.pos[2], cam.foc[0], cam.foc[1], cam.foc[2], 0, 0, 1);
-		gl.uniformMatrix4fv(u_ViewMatrix, false, view_matrix.elements);
+		for(let i = 0; i < mvp_shaders.length; i++){
+			switch_shader(mvp_shaders[i]);
+			gl.uniformMatrix4fv(u_ViewMatrix[i], false, view_matrix.elements);
+		}
 
-		draw(gl);
+		draw();
 		requestAnimationFrame(tick, c);
 	}
 	tick();
@@ -145,20 +131,12 @@ function main(){
 	}
 }
 
-function draw(gl){
+function draw(){
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	gl.uniform1i(u_Point, 1);
-	gl.drawArrays(gl.POINTS, 0, part_sys.num);
-
-	gl.uniform1i(u_Point, 0);
-	if(part_sys.FC_num.tri > 0){
-		gl.drawArrays(gl.TRIANGLES, part_sys.num, part_sys.FC_num.tri);
+	for(let i = 0; i < drawers.length; i++){
+		drawers[i].draw();
 	}
-	if(part_sys.FC_num.lin > 0){
-		gl.drawArrays(gl.LINES, part_sys.num + part_sys.FC_num.tri, part_sys.FC_num.lin);
-	}
-	gl.drawArrays(gl.TRIANGLES, part_sys.num + part_sys.FC_num.all, (pos_buf.length - (part_sys.num + part_sys.FC_num.all)*3)/3);
 }
 
 function key_down(e){
