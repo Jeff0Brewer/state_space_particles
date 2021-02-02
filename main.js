@@ -85,7 +85,6 @@ function main(){
 		gl.uniformMatrix4fv(u_ProjMatrix[i], false, proj_matrix.elements);
 	}
 
-
 	let last_t = Date.now();
 	var tick = function(){
 		let this_t = Date.now();

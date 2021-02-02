@@ -37,11 +37,15 @@ class Drawer{
 	draw(){
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.gl_buf);
 		let offset = 0;
+		let last_sh = -1;
 		for(let i = 0; i < this.sh.length; i++){
 			if(this.brk[i] > 0){
-				switch_shader(this.sh[i]);
-				gl.vertexAttribPointer(gl.getAttribLocation(gl.program, 'a_Position'), 3, gl.FLOAT, false, this.fsize*this.fpv, 0);
-				gl.vertexAttribPointer(gl.getAttribLocation(gl.program, 'a_Color'), 4, gl.FLOAT, false, this.fsize*this.fpv, 3*this.fsize);
+				if(this.sh[i] != last_sh){
+					switch_shader(this.sh[i]);
+					gl.vertexAttribPointer(gl.getAttribLocation(gl.program, 'a_Position'), 3, gl.FLOAT, false, this.fsize*this.fpv, 0);
+					gl.vertexAttribPointer(gl.getAttribLocation(gl.program, 'a_Color'), 4, gl.FLOAT, false, this.fsize*this.fpv, 3*this.fsize);
+					last_sh = this.sh[i];
+				}
 				gl.drawArrays(this.typ[i], offset, this.brk[i]);
 				offset += this.brk[i];
 			}
