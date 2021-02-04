@@ -38,11 +38,3 @@ function setup_gl(canvas){
 	programs.push(create_program(document.getElementById('v_ball').text, document.getElementById('f_ball').text));
 	programs.push(create_program(document.getElementById('v_simple').text, document.getElementById('f_simple').text));
 }
-
-
-
-
-
-
-
-

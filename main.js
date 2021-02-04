@@ -40,7 +40,7 @@ function main(){
 		new DragForcer(.3, num_particle)
 	];
 	// for(let i = 0; i < num_particle - 1; i++){
-	// 	F.push(new SpringForcer(.25, 100, 100, i, i + 1)); 
+	// 	F.push(new SpringForcer(.2, 100, 100, i, i + 1)); 
 	// }
 	C = [
 		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 8], 2, 4, .5, num_particle),
@@ -85,20 +85,16 @@ function main(){
 		gl.uniformMatrix4fv(u_ProjMatrix[i], false, proj_matrix.elements);
 	}
 
-	let last_t = Date.now();
+	let timestep = 1000/60;
 	var tick = function(){
-		let this_t = Date.now();
-		let elapsed = this_t - last_t;
-		last_t = this_t;
-
-		if(!paused && elapsed < 500){
+		if(!paused){
 			part_sys.applyAllForces(part_sys.s1, part_sys.F);
-			part_sys.solver(elapsed);
+			part_sys.solver(timestep);
 			part_sys.doConstraint(part_sys.s1, part_sys.s2, part_sys.C);
 			part_sys.render(drawers[0]);
 			part_sys.swap();
 		}
-		cam.strafe(elapsed);
+		cam.strafe(timestep);
 		view_matrix.setLookAt(cam.pos[0], cam.pos[1], cam.pos[2], cam.foc[0], cam.foc[1], cam.foc[2], 0, 0, 1);
 		for(let i = 0; i < mvp_shaders.length; i++){
 			switch_shader(mvp_shaders[i]);
@@ -106,9 +102,8 @@ function main(){
 		}
 
 		draw();
-		requestAnimationFrame(tick, c);
 	}
-	tick();
+	setInterval(tick, timestep);
 
 	window.addEventListener('keydown', key_down, false);
 	window.addEventListener('keyup', key_up, false);
