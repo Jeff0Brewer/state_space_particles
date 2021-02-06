@@ -1,3 +1,51 @@
+class BoidForcer{
+	constructor(co_f, al_f, sp_f, d, num){
+		this.num = num;
+		this.d = d;
+		this.f = {
+			co: co_f,
+			al: al_f,
+			sp: sp_f
+		};
+
+		this.data_len = 0;
+	}
+
+	apply_force(s){
+		let p = [];
+		let v = [];
+		for(let n = 0; n < this.num; n++){
+			let co = [0, 0, 0];
+			let al = [0, 0, 0];
+			let sp = [0, 0, 0];
+			let count = 0;
+			for(let i = 0; i < this.num; i++){
+				if(n == 0){
+					p.push(s.slice(i*IND.FPP + IND.POS, i*IND.FPP + IND.POS + 3));
+					v.push(s.slice(i*IND.FPP + IND.VEL, i*IND.FPP + IND.VEL + 3));
+				}
+				let p_diff = sub(p[n], p[i]);
+				let d = mag(p_diff);
+				if(d < this.d && i != n){
+					count++;
+					co = add(co, p[i]);
+					al = add(al, v[i]);
+					sp = add(sp, mult_scalar(norm(p_diff), map(d, [0, this.d], [this.f.sp, 0])));
+				}
+			}
+			if(count > 0){
+				co = mult_scalar(co, 1/count);
+				co = mult_scalar(norm(sub(co, p[n])), this.f.co);
+				sp = mult_scalar(norm(sp), this.f.sp);
+				al = mult_scalar(norm(sub(al, v[n])), this.f.al);
+				for(let j = 0; j < 3; j++){
+					s[n*IND.FPP + IND.FOR + j] += co[j] + al[j] + sp[j]; 
+				}
+			}
+		}
+	}
+}
+
 class SpringForcer{
 	constructor(length, strength, damping, ind_a, ind_b){
 		this.len = length;

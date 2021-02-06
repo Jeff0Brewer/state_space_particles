@@ -1,7 +1,7 @@
 let paused = false;
 let init = {
 	center: [0, 5, 10],
-	size: .5,
+	size: 3,
 	speed: 1
 }
 
@@ -34,19 +34,19 @@ function main(){
 		}
 	}
 
-	let num_particle = 2000;
+	let num_particle = 90;
 	F = [
-		new GravityForcer(-9.8, num_particle),
+		new BoidForcer(10, 10, 10, 2, num_particle),
 		new DragForcer(.3, num_particle)
 	];
 	// for(let i = 0; i < num_particle - 1; i++){
 	// 	F.push(new SpringForcer(.2, 100, 100, i, i + 1)); 
 	// }
 	C = [
-		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 8], 2, 4, .5, num_particle),
-		new WallConstraint([0, .2, 1], [1, 0, 0], [0, -3, 6], 2, 4, .5, num_particle),
-		new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 4], 2, 4, .5, num_particle),
-		new WallConstraint([-.35, 0, 1], [0, 1, 0], [0, -3.5, 2], 2, 2, .5, num_particle),
+		// new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 8], 2, 4, .5, num_particle),
+		// new WallConstraint([0, .2, 1], [1, 0, 0], [0, -3, 6], 2, 4, .5, num_particle),
+		// new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 4], 2, 4, .5, num_particle),
+		// new WallConstraint([-.35, 0, 1], [0, 1, 0], [0, -3.5, 2], 2, 2, .5, num_particle),
 
 		new AxisConstraint(0, -10, .85, num_particle),
 		new AxisConstraint(0, 10, .85, num_particle),

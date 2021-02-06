@@ -6,6 +6,14 @@ function mult_scalar(vec, s){
 	return o;
 }
 
+//dist between two vectors
+function dist(a, b){
+	let s = 0;
+	for(let i = 0; i < a.length; i++)
+		s += Math.pow(a[i] - b[i], 2);
+	return Math.sqrt(s);
+}
+
 //find magnitude of vector
 function mag(vec){ 
 	let s = 0;
@@ -16,7 +24,8 @@ function mag(vec){
 
 //find normal of vector
 function norm(vec){ 
-	return mult_scalar(vec, 1/mag(vec));
+	let m = mag(vec);
+	return m != 0 ? mult_scalar(vec, 1/mag(vec)) : [0, 0, 0];
 }
 
 //find sum of two vectors
