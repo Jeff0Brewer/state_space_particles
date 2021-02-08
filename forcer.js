@@ -196,7 +196,7 @@ class DragForcer{
 		for(let n = 0; n < this.num; n++){
 			let v = s.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
 			if(mag(v) > 0){
-				let f = mult_scalar(norm(v), this.v*Math.pow(mag(v), 2)*s[n*IND.FPP + IND.MAS]);
+				let f = mult_scalar(norm(v), this.v*Math.pow(mag(v), 2));
 				for(let i = 0; i < f.length; i++){
 					if(!isFinite(f[i]))
 						f[i] = Math.sign(f[i])*this.max;

@@ -30,8 +30,8 @@ function main(){
 	}
 
 	let boid_num = 90;
-	let boid_bound = 4;
-	let boid_center = [0, 3.5, boid_bound];
+	let boid_bound = 3.5;
+	let boid_center = [0, 4, boid_bound];
 	let boid_sys = {
 		num: boid_num,
 		F: [
@@ -97,7 +97,7 @@ function main(){
 		F: [
 			new FireForcer(fire_center, fire_radius, 3, fire_force, fire_num),
 			new GravityForcer(-9.8, fire_num),
-			new DragForcer(.4, fire_num)
+			new DragForcer(.002, fire_num)
 		],
 		C: [
 			new FireConstraint(fire_center, fire_radius, fire_force, fire_map, fire_init, fire_num),
@@ -111,10 +111,44 @@ function main(){
 		init: fire_init
 	}
 
+	let spring_num = 12;
+	let spring_bound = 3.5;
+	let spring_center = [0, -4, spring_bound];
+	let spring_sys = {
+		num: spring_num,
+		F: [
+			new GravityForcer(-9.8, spring_num),
+			new DragForcer(.8, spring_num)
+		],
+		C: [
+			new AxisConstraint(0, -1, -spring_bound + spring_center[0], .9, spring_num),
+			new AxisConstraint(0, 1, spring_bound + spring_center[0], .9, spring_num),
+			new AxisConstraint(1, -1, -spring_bound + spring_center[1], .9, spring_num),
+			new AxisConstraint(1, 1, spring_bound + spring_center[1], .9, spring_num),
+			new AxisConstraint(2, -1, 0, .5, spring_num),
+			new AxisConstraint(2, 1, 2*spring_bound, .5, spring_num)
+		],
+		init: function(){
+			let p = spring_center;
+			let v = [Math.random(), Math.random(), Math.random()];
+			let f = [0, 0, 0];
+			let m = 5;
+			let s = 0;
+			let c = [1, 1, 1, 1];
+			return p.concat(v, f, m, s, c);
+		}
+	}
+	let connect_ind = [[0, 1], [1, 2], [2, 0], [0, 3], [1, 3], [2, 3],
+					   [4, 5], [5, 6], [6, 4], [4, 7], [5, 7], [6, 7],
+					   [8, 9], [9, 10], [10, 8], [8, 11], [9, 11], [10, 11]];
+	for(let i = 0; i < connect_ind.length; i++){
+		spring_sys.F.push(new SpringForcer(1, 8000, 100, connect_ind[i][0], connect_ind[i][1]));
+	}
 
 	part_sys = [
 		new PartSys(boid_sys.num, boid_sys.F, boid_sys.C, boid_sys.init),
-		new PartSys(fire_sys.num, fire_sys.F, fire_sys.C, fire_sys.init)
+		new PartSys(fire_sys.num, fire_sys.F, fire_sys.C, fire_sys.init),
+		new PartSys(spring_sys.num, spring_sys.F, spring_sys.C, spring_sys.init)
 	];
 	for(let i = 0; i < part_sys.length; i++){
 		part_sys[i].init();
@@ -123,6 +157,7 @@ function main(){
 	drawers = [
 		new Drawer([2, 0, 0], [part_sys[0].num, part_sys[0].FC_num.tri, part_sys[0].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([3, 0, 0], [part_sys[1].num, part_sys[1].FC_num.tri, part_sys[1].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
+		new Drawer([1, 0, 0], [part_sys[2].num, part_sys[2].FC_num.tri, part_sys[2].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([0], [grid.length/FPV], [gl.TRIANGLES])
 	];
 	drawers[drawers.length - 1].buffer_data(0, new Float32Array(grid));
