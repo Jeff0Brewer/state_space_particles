@@ -13,11 +13,12 @@
   <div class="label">time factor: </div>
   <input class="input time_text" type="text" id="tf_text" value="1.0"/>
   <input class="input" type="range" id="tf_range" value="1.0" min=".1" max="2" step=".01"/>
-  <script id="v_point" type="glsl">
+  <script id="v_simple" type="glsl">
     precision mediump float;
 
     attribute vec4 a_Position;
     attribute vec4 a_Color;
+    attribute float a_Size;
 
     uniform mat4 u_ModelMatrix;
     uniform mat4 u_ViewMatrix;
@@ -27,7 +28,7 @@
 
     void main(){
       gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;
-      gl_PointSize = 60.0/gl_Position.w;
+      gl_PointSize = a_Size/gl_Position.w;
       v_Color = a_Color;
     }
   </script>
@@ -59,23 +60,6 @@
       }
     }
   </script>
-  <script id="v_simple" type="glsl">
-    precision mediump float;
-
-    attribute vec4 a_Position;
-    attribute vec4 a_Color;
-
-    uniform mat4 u_ModelMatrix;
-    uniform mat4 u_ViewMatrix;
-    uniform mat4 u_ProjMatrix;
-
-    varying vec4 v_Color;
-
-    void main(){
-      gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;
-      v_Color = a_Color;
-    }
-  </script>
   <script id="f_simple" type="glsl">
     precision mediump float;
 
@@ -91,10 +75,10 @@
   <script src="lib/cuon-matrix-quat.js"></script> 
   <script src="util.js"></script>
   <script src="gl.js"></script>
-  <script src="drawer.js"></script>
   <script src="partsys.js"></script>
   <script src="forcer.js"></script>
   <script src="constraint.js"></script>
+  <script src="drawer.js"></script>
   <script src="camera.js"></script>
   <script src="main.js"></script>
 </body>

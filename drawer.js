@@ -3,7 +3,7 @@ class Drawer{
 		this.sh = shader_inds;
 		this.brk = buffer_breaks;
 		this.typ = draw_types;
-		this.fpv = 7; // px, py, pz, cr, cg, cb, ca
+		this.fpv = FPV;
 
 		let len = 0;
 		for(let i = 0; i < this.brk.length; i++){
@@ -26,6 +26,10 @@ class Drawer{
 			let a_Color = gl.getAttribLocation(gl.program, 'a_Color');
 			gl.vertexAttribPointer(a_Color, 4, gl.FLOAT, false, this.fsize*this.fpv, 3*this.fsize);
 			gl.enableVertexAttribArray(a_Color);
+
+			let a_Size = gl.getAttribLocation(gl.program, 'a_Size');
+			gl.vertexAttribPointer(a_Size, 1, gl.FLOAT, false, this.fsize*this.fpv, 7*this.fsize);
+			gl.enableVertexAttribArray(a_Size);
 		}
 	}
 
@@ -44,6 +48,7 @@ class Drawer{
 					switch_shader(this.sh[i]);
 					gl.vertexAttribPointer(gl.getAttribLocation(gl.program, 'a_Position'), 3, gl.FLOAT, false, this.fsize*this.fpv, 0);
 					gl.vertexAttribPointer(gl.getAttribLocation(gl.program, 'a_Color'), 4, gl.FLOAT, false, this.fsize*this.fpv, 3*this.fsize);
+					gl.vertexAttribPointer(gl.getAttribLocation(gl.program, 'a_Size'), 1, gl.FLOAT, false, this.fsize*this.fpv, 7*this.fsize);
 					last_sh = this.sh[i];
 				}
 				gl.drawArrays(this.typ[i], offset, this.brk[i]);

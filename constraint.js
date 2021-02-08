@@ -45,10 +45,11 @@ class WallConstraint{
 		for(let i = 0; i < ind.length; i++){
 			lin = lin.concat(points[ind[i]]);
 			lin = lin.concat(color);
+			lin.push(0);
 		}
 
 		this.data = [[], lin];
-		this.data_len = [0, FPV*ind.length];
+		this.data_len = [0, lin.length];
 	}
 
 	constrain(s1, s2){

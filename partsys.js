@@ -3,11 +3,12 @@ IND = { // px, py, pz, vx, vy, vz, fx, fy, fz, m
 	VEL: 3, //velocity
 	FOR: 6, //force
 	MAS: 9, //mass
-	COL: 12, //color
-	FPP: 16 //floats per particle
+	SIZ: 10, //size
+	COL: 13, //color
+	FPP: 17 //floats per particle
 }
 APRX_0 = [0, 0, .00000000000001];
-FPV = 7;
+FPV = 8;
 
 function PartSys(num){
 	this.num = num;
@@ -36,6 +37,8 @@ function PartSys(num){
 				this.s1[i] = 0;
 			else if (v_ind == IND.MAS)
 				this.s1[i] = map(Math.random(), [0, 1], m_b);
+			else if (v_ind == IND.SIZ)
+				this.s1[i] = map(Math.random(), [0, 1], [30, 60]);
 			else if (v_ind < IND.COL + 4)
 				this.s1[i] = colors[p_ind % colors.length][v_ind - IND.COL];
 
@@ -144,6 +147,8 @@ function PartSys(num){
 			for(let i = 0; i < 4; i++, buf_ind++){
 				buf[buf_ind] = this.s2[n*IND.FPP + IND.COL + i];
 			}
+			buf[buf_ind] = this.s2[n*IND.FPP + IND.SIZ];
+			buf_ind++;
 		}
 
 		let FC = this.F.concat(this.C);

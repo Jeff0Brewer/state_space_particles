@@ -15,19 +15,19 @@ function main(){
 	let s = 1.0;
 	let z = -.1;
 	let sq = [
-		0, 0, z, 0, 0, 0, 1,
-		0, s, z, 0, 0, 0, 1,
-		s, s, z, 0, 0, 0, 1,
-		s, s, z, 0, 0, 0, 1,
-		0, 0, z, 0, 0, 0, 1,
-		s, 0, z, 0, 0, 0, 1
+		0, 0, z, 0, 0, 0, 1, 0,
+		0, s, z, 0, 0, 0, 1, 0,
+		s, s, z, 0, 0, 0, 1, 0,
+		s, s, z, 0, 0, 0, 1, 0,
+		0, 0, z, 0, 0, 0, 1, 0,
+		s, 0, z, 0, 0, 0, 1, 0
 	];
 	let sq_ind = 0;
 	let grid = [];
 	for(let x = -grid_size/2*s; x < grid_size/2*s; x += s){
 		for(let y = -grid_size/2*s; y < grid_size/2*s; y += s, sq_ind++){
 			let b = .2*(sq_ind % 2);
-			let off = [x, y, 0, b, b, b, 0];
+			let off = [x, y, 0, b, b, b, 0, 0];
 			for(let i = 0; i < sq.length; i++){
 				grid.push(sq[i] + off[i % off.length]);
 			}
@@ -36,7 +36,7 @@ function main(){
 
 	let num_particle = 90;
 	F = [
-		new BoidForcer(8, 5, 6, 50, 1, [0, 0, 3], 1.5, num_particle),
+		new BoidForcer(8, 5, 8, 50, 1.5, [0, 0, 3], 1.5, num_particle),
 		new DragForcer(.2, num_particle)
 	];
 	// for(let i = 0; i < num_particle - 1; i++){
@@ -50,22 +50,15 @@ function main(){
 
 		new BoundConstraint(0, -3, 3, num_particle),
 		new BoundConstraint(1, -3, 3, num_particle),
-		new BoundConstraint(2, 0, 6, num_particle)
-
-
-		// new AxisConstraint(0, -10, .85, num_particle),
-		// new AxisConstraint(0, 10, .85, num_particle),
-		// new AxisConstraint(1, -10, .85, num_particle),
-		// new AxisConstraint(1, 10, .85, num_particle),
-		// new AxisConstraint(2, -.05, .85, num_particle),
-		// new AxisConstraint(2, 20, .85, num_particle)
+		new AxisConstraint(2, -.05, 1, num_particle),
+		new AxisConstraint(2, 6, 1, num_particle)
 	];
 	part_sys = new PartSys(num_particle);
 	part_sys.init(init.center, init.size, init.speed, [5, 10], F, C);
 
 	drawers = [
 		new Drawer([2, 0, 0], [part_sys.num, part_sys.FC_num.tri, part_sys.FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
-		new Drawer([0], [grid.length/7], [gl.TRIANGLES])
+		new Drawer([0], [grid.length/FPV], [gl.TRIANGLES])
 	];
 	drawers[1].buffer_data(0, new Float32Array(grid));
 

@@ -18,6 +18,7 @@ class BoidForcer{
 			iso[i] = add(mult_scalar(iso[i], this.r), this.c);
 			tri = tri.concat(iso[i]);
 			tri = tri.concat(color);
+			tri.push(0);
 		}
 
 		this.data = [tri, []];
@@ -113,6 +114,7 @@ class SpringForcer{
 			for(let j = 0; j < 4; j++){
 				lin.push(color[j]);
 			}
+			lin.push(0);
 		}
 		return [[], lin];
 	}

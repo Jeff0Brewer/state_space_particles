@@ -112,7 +112,7 @@ function gen_iso(iter){
 		t = n_t.slice();
 	}
 
-	//return pairs of vertices for wireframe mesh
+	//return triangles for rendering
 	let o = [];
 	for(let i = 0; i < t.length; i++){
 		o = o.concat([v[t[i][0]]], [v[t[i][1]]], [v[t[i][2]]]);

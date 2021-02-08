@@ -35,6 +35,6 @@ function setup_gl(canvas){
 	gl.clearColor(0, 0, 0, 1);
 
 	programs.push(create_program(document.getElementById('v_simple').text, document.getElementById('f_simple').text));
-	programs.push(create_program(document.getElementById('v_point').text, document.getElementById('f_ball').text));
-	programs.push(create_program(document.getElementById('v_point').text, document.getElementById('f_boid').text));
+	programs.push(create_program(document.getElementById('v_simple').text, document.getElementById('f_ball').text));
+	programs.push(create_program(document.getElementById('v_simple').text, document.getElementById('f_boid').text));
 }
