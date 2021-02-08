@@ -76,6 +76,32 @@ class WallConstraint{
 	}
 }
 
+class BoundConstraint{
+	constructor(axis_ind, min, max, num){
+		this.ind = axis_ind;
+		this.min = min;
+		this.max = max;
+		this.siz = max - min;
+		this.num = num;
+
+		this.data_len = 0;
+	}
+
+	constrain(s1, s2){
+		for(let n = 0; n < this.num; n++){
+			let p1 = s1[n*IND.FPP + IND.POS + this.ind];
+			let p2 = s2[n*IND.FPP + IND.POS + this.ind];
+			if(p1 >= this.min && p2 < this.min){
+				s2[n*IND.FPP + IND.POS + this.ind] += this.siz;
+			}
+			else if(p1 <= this.max && p2 > this.max){
+				s2[n*IND.FPP + IND.POS + this.ind] -= this.siz;
+			}
+		}
+	}
+}
+
+
 class AxisConstraint{
 	constructor(axis_ind, offset, coeff, num){
 		this.ind = axis_ind;

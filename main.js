@@ -1,15 +1,15 @@
 let paused = false;
 let init = {
-	center: [0, 5, 10],
+	center: [0, 0, 3],
 	size: 3,
-	speed: 1
+	speed: 2
 }
 
 function main(){
 	c = document.getElementById('canvas')
 	setup_gl(c);
 
-	cam = new CameraController([-9, -7, 9], [0, 0, 4], 1.25, .01);
+	cam = new CameraController([-5, -7, 5], init.center, 1.25, .01);
 
 	let grid_size = 75;
 	let s = 1.0;
@@ -36,8 +36,8 @@ function main(){
 
 	let num_particle = 90;
 	F = [
-		new BoidForcer(10, 10, 10, 2, num_particle),
-		new DragForcer(.3, num_particle)
+		new BoidForcer(8, 5, 6, 50, 1, [0, 0, 3], 1.5, num_particle),
+		new DragForcer(.2, num_particle)
 	];
 	// for(let i = 0; i < num_particle - 1; i++){
 	// 	F.push(new SpringForcer(.2, 100, 100, i, i + 1)); 
@@ -48,19 +48,24 @@ function main(){
 		// new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 4], 2, 4, .5, num_particle),
 		// new WallConstraint([-.35, 0, 1], [0, 1, 0], [0, -3.5, 2], 2, 2, .5, num_particle),
 
-		new AxisConstraint(0, -10, .85, num_particle),
-		new AxisConstraint(0, 10, .85, num_particle),
-		new AxisConstraint(1, -10, .85, num_particle),
-		new AxisConstraint(1, 10, .85, num_particle),
-		new AxisConstraint(2, -.05, .85, num_particle),
-		new AxisConstraint(2, 20, .85, num_particle)
+		new BoundConstraint(0, -3, 3, num_particle),
+		new BoundConstraint(1, -3, 3, num_particle),
+		new BoundConstraint(2, 0, 6, num_particle)
+
+
+		// new AxisConstraint(0, -10, .85, num_particle),
+		// new AxisConstraint(0, 10, .85, num_particle),
+		// new AxisConstraint(1, -10, .85, num_particle),
+		// new AxisConstraint(1, 10, .85, num_particle),
+		// new AxisConstraint(2, -.05, .85, num_particle),
+		// new AxisConstraint(2, 20, .85, num_particle)
 	];
 	part_sys = new PartSys(num_particle);
 	part_sys.init(init.center, init.size, init.speed, [5, 10], F, C);
 
 	drawers = [
-		new Drawer([0, 1, 1], [part_sys.num, part_sys.FC_num.tri, part_sys.FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
-		new Drawer([1], [grid.length/7], [gl.TRIANGLES])
+		new Drawer([2, 0, 0], [part_sys.num, part_sys.FC_num.tri, part_sys.FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
+		new Drawer([0], [grid.length/7], [gl.TRIANGLES])
 	];
 	drawers[1].buffer_data(0, new Float32Array(grid));
 
@@ -73,7 +78,7 @@ function main(){
 	u_ModelMatrix = [];
 	u_ViewMatrix = [];
 	u_ProjMatrix = [];
-	mvp_shaders = [0, 1];
+	mvp_shaders = [0, 1, 2];
 	for(let i = 0; i < mvp_shaders.length; i++){
 		switch_shader(mvp_shaders[i]);
 		u_ModelMatrix.push(gl.getUniformLocation(gl.program, 'u_ModelMatrix'));

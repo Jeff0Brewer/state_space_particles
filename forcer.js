@@ -1,23 +1,38 @@
 class BoidForcer{
-	constructor(co_f, al_f, sp_f, d, num){
+	constructor(co_f, al_f, sp_f, av_f, d, center, radius, num){
 		this.num = num;
+		this.c = center;
+		this.r = radius;
 		this.d = d;
 		this.f = {
 			co: co_f,
 			al: al_f,
-			sp: sp_f
+			sp: sp_f,
+			av: av_f
 		};
 
-		this.data_len = 0;
+		let iso = gen_iso(2);
+		let tri = [];
+		let color = [1, 1, 1, 1];
+		for(let i = 0; i < iso.length; i++){
+			iso[i] = add(mult_scalar(iso[i], this.r), this.c);
+			tri = tri.concat(iso[i]);
+			tri = tri.concat(color);
+		}
+
+		this.data = [tri, []];
+		this.data_len = [tri.length, 0];
 	}
 
 	apply_force(s){
 		let p = [];
 		let v = [];
 		for(let n = 0; n < this.num; n++){
+			let f = [0, 0, 0];
 			let co = [0, 0, 0];
 			let al = [0, 0, 0];
 			let sp = [0, 0, 0];
+			let av = [0, 0, 0];
 			let count = 0;
 			for(let i = 0; i < this.num; i++){
 				if(n == 0){
@@ -33,16 +48,29 @@ class BoidForcer{
 					sp = add(sp, mult_scalar(norm(p_diff), map(d, [0, this.d], [this.f.sp, 0])));
 				}
 			}
+			av = sub(p[n], this.c);
+			let d_sph = mag(av) - this.r;
+			if(d_sph < this.d){
+				av = mult_scalar(norm(av), this.f.av*(this.d - d_sph)/this.d);
+				f = add(f, av);
+			}
 			if(count > 0){
 				co = mult_scalar(co, 1/count);
 				co = mult_scalar(norm(sub(co, p[n])), this.f.co);
 				sp = mult_scalar(norm(sp), this.f.sp);
 				al = mult_scalar(norm(sub(al, v[n])), this.f.al);
 				for(let j = 0; j < 3; j++){
-					s[n*IND.FPP + IND.FOR + j] += co[j] + al[j] + sp[j]; 
+					f[j] += co[j] + al[j] + sp[j]; 
 				}
 			}
+			for(let i = 0; i < f.length; i++){
+				s[n*IND.FPP + IND.FOR + i] += f[i];
+			}
 		}
+	}
+
+	get_buf_data(s){
+		return this.data;
 	}
 }
 
@@ -52,7 +80,6 @@ class SpringForcer{
 		this.str = strength;
 		this.dmp = damping;
 		this.inds = [ind_a, ind_b];
-		this.max = 100000;
 
 		this.data_len = [0, FPV*2];
 	}

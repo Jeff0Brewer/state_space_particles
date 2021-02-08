@@ -31,10 +31,10 @@ function setup_gl(canvas){
 	gl = canvas.getContext('webgl', {preserveDrawingBuffer: false});
 	gl.enable(gl.DEPTH_TEST);
 	gl.enable(gl.BLEND);
-	gl.disable(gl.CULL_FACE);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.clearColor(0, 0, 0, 1);
 
-	programs.push(create_program(document.getElementById('v_ball').text, document.getElementById('f_ball').text));
 	programs.push(create_program(document.getElementById('v_simple').text, document.getElementById('f_simple').text));
+	programs.push(create_program(document.getElementById('v_point').text, document.getElementById('f_ball').text));
+	programs.push(create_program(document.getElementById('v_point').text, document.getElementById('f_boid').text));
 }
