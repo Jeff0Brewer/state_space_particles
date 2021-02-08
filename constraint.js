@@ -1,3 +1,43 @@
+class FireConstraint{
+	constructor(center, radius, heat_force, color_map, init, num){
+		this.num = num;
+		this.c = center;
+		this.r = radius;
+		this.f = heat_force;
+		this.color_map = color_map;
+		this.init = init;
+
+		this.data_len = 0;
+	}
+
+	constrain(s1, s2){
+		for(let n = 0; n < this.num; n++){
+			let p2 = s2.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
+			let v2 = s2.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
+			let f1 = s1.slice(n*IND.FPP + IND.FOR, n*IND.FPP + IND.FOR + 3);
+			p2 = sub(p2, this.c);
+
+			let dm = map(mag(f1), [0, this.f], [1, .8]);
+			let sz = map(mag(v2), [0, 3], [0, 75]);
+			sz = sz > 100 ? 100 : sz;
+			let color = this.color_map(mag(v2), [0, 3]);
+
+			s2[n*IND.FPP + IND.MAS] *= dm;
+			s2[n*IND.FPP + IND.SIZ] = sz;
+			for(let i = 0; i < color.length; i++){
+				s2[n*IND.FPP + IND.COL + i] = color[i];
+			}
+
+			if(mag(p2.slice(0, 2)) > this.r || v2[2] < 0){
+				let p_new = this.init();
+				for(let i = 0; i < p_new.length; i++){
+					s2[n*IND.FPP + i] = p_new[i];
+				}
+			}	
+		}
+	}
+}
+
 class FixConstraint{
 	constructor(particle_ind, position){
 		this.ind = particle_ind;

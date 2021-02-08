@@ -1,3 +1,28 @@
+class FireForcer{
+	constructor(center, radius, height, heat_force, num){
+		this.num = num
+		this.c = center;
+		this.r = radius;
+		this.h = height;
+		this.f = heat_force;
+
+		this.data_len = 0;
+	}
+
+	apply_force(s){
+		for(let n = 0; n < this.num; n++){
+			let p = s.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
+			p = sub(p, this.c);
+			let heat_mag = map(p[2], [0, this.h], [map(mag(p.slice(0, 2)), [0, this.r], [this.f, 0]), 0]);
+			heat_mag = heat_mag > 0 ? heat_mag : 0;
+			let f = mult_scalar([0, 0, 1], heat_mag);
+			for(let i = 0; i < f.length; i++){
+				s[n*IND.FPP + IND.FOR + i] += f[i];
+			}
+		}
+	}
+}
+
 class BoidForcer{
 	constructor(co_f, al_f, sp_f, av_f, d, center, radius, num){
 		this.num = num;
@@ -171,7 +196,7 @@ class DragForcer{
 		for(let n = 0; n < this.num; n++){
 			let v = s.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
 			if(mag(v) > 0){
-				let f = mult_scalar(norm(v), this.v*Math.pow(mag(v), 2));
+				let f = mult_scalar(norm(v), this.v*Math.pow(mag(v), 2)*s[n*IND.FPP + IND.MAS]);
 				for(let i = 0; i < f.length; i++){
 					if(!isFinite(f[i]))
 						f[i] = Math.sign(f[i])*this.max;

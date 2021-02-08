@@ -37,4 +37,5 @@ function setup_gl(canvas){
 	programs.push(create_program(document.getElementById('v_simple').text, document.getElementById('f_simple').text));
 	programs.push(create_program(document.getElementById('v_simple').text, document.getElementById('f_ball').text));
 	programs.push(create_program(document.getElementById('v_simple').text, document.getElementById('f_boid').text));
+	programs.push(create_program(document.getElementById('v_simple').text, document.getElementById('f_fire').text));
 }

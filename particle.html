@@ -30,6 +30,19 @@
       v_Color = a_Color;
     }
   </script>
+  <script id="f_fire" type="glsl">
+    precision mediump float;
+
+    varying vec4 v_Color;
+
+    void main(){
+      float d = distance(gl_PointCoord, vec2(0.5, 0.5));
+      if(d > 0.5){
+        discard;
+      }
+      gl_FragColor = v_Color;
+    }
+  </script>
   <script id="f_boid" type="glsl">
     precision mediump float;
 
