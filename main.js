@@ -1,5 +1,4 @@
 let paused = false;
-let time_factor = 1.0;
 
 function main(){
 	c = document.getElementById('canvas')
@@ -62,13 +61,13 @@ function main(){
 		}
 	};
 
-	let fire_num = 650;
+	let fire_num = 700;
 	let fire_bound = 3.5;
 	let fire_center = [0, 12, 0];
-	let fire_radius = 2;
-	let fire_force = .4;
+	let fire_radius = 1.75;
+	let fire_force = .25;
 	let fire_map = function(val, bound){
-		let colors = [[0, 0, 0], [.2, .2, .2], [.5, 0, 0], [1, 0, 0], [1, .5, 0]];
+		let colors = [[0, 0, 0], [.3, .3, .3], [.5, 0, 0], [1, 0, 0], [1, .5, 0]];
 		let per = (val - bound[0])/(bound[1] - bound[0]);
 		if(per < 0)
 			return colors[0];
@@ -86,9 +85,9 @@ function main(){
 		let angle = Math.random()*2*Math.PI;
 		let radius = Math.random()*fire_radius;
 		let p = add(fire_center, [Math.cos(angle)*radius, Math.sin(angle)*radius, 0]);
-		let v = mult_scalar(norm([Math.random()*1 - .5, Math.random()*1 - .5, 1]), Math.random()*5);
+		let v = mult_scalar(norm([Math.random()*1 - .5, Math.random()*1 - .5, 1]), Math.random()*4 + 1);
 		let f = [0, 0, 0];
-		let m = map(Math.random(), [0, 1], [.05, .1]);
+		let m = map(Math.random(), [0, 1], [.01, .02]);
 		let s = map(Math.random(), [0, 1], [25, 50]);
 		let c = [1, 0, 0, 1];
 		return p.concat(v, f, m, s, c);
@@ -154,7 +153,7 @@ function main(){
 		if(!paused){
 			for(let i = 0; i < part_sys.length; i++){
 				part_sys[i].applyAllForces(part_sys[i].s1, part_sys[i].F);
-				part_sys[i].solver(timestep*time_factor);
+				part_sys[i].solver(timestep);
 				part_sys[i].doConstraint(part_sys[i].s1, part_sys[i].s2, part_sys[i].C);
 				part_sys[i].render(drawers[i]);
 				part_sys[i].swap();
@@ -242,29 +241,4 @@ function key_up(e){
 			cam.add_strafe([-1, 0]);
 			break;
 	}
-}
-
-let tf_text = document.getElementById('tf_text');
-let tf_range = document.getElementById('tf_range');
-
-tf_text.onchange = function(){
-	let value = parseFloat(this.value);
-	if(!Number.isNaN(value)){
-		value = value > tf_range.max ? tf_range.max : value;
-		value = value < tf_range.min ? tf_range.min : value;
-		tf_range.value = value;
-		time_factor = value;
-	}
-}
-
-tf_range.oninput = function(){
-	tf_text.value = this.value;
-	time_factor = this.value;
-}
-
-tf_range.onchange = function(){
-	if(Math.abs(this.value - 1.0) < .25)
-		this.value = 1.0;
-	tf_text.value = this.value;
-	time_factor = this.value;
 }

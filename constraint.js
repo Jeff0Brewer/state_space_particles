@@ -17,12 +17,12 @@ class FireConstraint{
 			let f1 = s1.slice(n*IND.FPP + IND.FOR, n*IND.FPP + IND.FOR + 3);
 			p2 = sub(p2, this.c);
 
-			let dm = map(mag(f1), [0, this.f], [1, .8]);
-			let sz = map(mag(v2), [0, 3], [0, 75]);
-			sz = sz > 100 ? 100 : sz;
-			let color = this.color_map(mag(v2), [0, 3]);
+			let dm = map(mag(f1), [0, this.f], [0, .0005]);
+			let sz = map(mag(v2), [0, 3], [0, 50]);
+			sz = sz > 50 ? 50 : sz;
+			let color = this.color_map(mag(v2) + s2[n*IND.FPP + IND.MAS]*5, [0, 3]);
 
-			s2[n*IND.FPP + IND.MAS] *= dm;
+			s2[n*IND.FPP + IND.MAS] -= dm;
 			s2[n*IND.FPP + IND.SIZ] = sz;
 			for(let i = 0; i < color.length; i++){
 				s2[n*IND.FPP + IND.COL + i] = color[i];
