@@ -4,62 +4,44 @@ IND = { // px, py, pz, vx, vy, vz, fx, fy, fz, m
 	FOR: 6, //force
 	MAS: 9, //mass
 	SIZ: 10, //size
-	COL: 13, //color
-	FPP: 17 //floats per particle
+	COL: 11, //color
+	FPP: 15 //floats per particle
 }
 APRX_0 = [0, 0, .00000000000001];
 FPV = 8;
 
-function PartSys(num){
+function PartSys(num, F, C, init){
 	this.num = num;
-	this.time_factor = 1.0;
-
+	this.F = F;
+	this.C = C;
+	this.init_single = init;
 	this.s1 = new Float32Array(IND.FPP*num);
 	this.s2 = new Float32Array(IND.FPP*num);
 
-	this.F = [];
-	this.C = [];
+	let FC_tri_len = 0;
+	let FC_lin_len = 0;
+	for(let i = 0; i < this.F.length; i++){
+		FC_tri_len += this.F[i].data_len != 0 ? this.F[i].data_len[0] : 0;
+		FC_lin_len += this.F[i].data_len != 0 ? this.F[i].data_len[1] : 0;
+	}
+	for(let i = 0; i < this.C.length; i++){
+		FC_tri_len += this.C[i].data_len != 0 ? this.C[i].data_len[0] : 0;
+		FC_lin_len += this.C[i].data_len != 0 ? this.C[i].data_len[1] : 0;
+	}
+	this.FC_num = {
+		tri: FC_tri_len/FPV,
+		lin: FC_lin_len/FPV,
+		all: (FC_tri_len + FC_lin_len)/FPV
+	};
 
-	this.init = function(center, size, vel, m_b, F, C){
-		this.F = F;
-		this.C = C;
-
-		let colors = [[1, .5, .5, 1], [.5, 1, .5, 1], [.5, .5, 1, 1]];
-		let p_b = [[-size, size], [-size, size], [-size, size]];
-		for(let i = 0; i < this.s1.length; i++){
-			let p_ind = Math.floor(i / IND.FPP);
-			let v_ind = i % IND.FPP;
-			if(v_ind < IND.POS + 3)
-				this.s1[i] = map(Math.random(), [0, 1], p_b[v_ind]) + center[v_ind - IND.POS];
-			else if (v_ind < IND.VEL + 3)
-				this.s1[i] = (Math.random() > .5 ? -1 : 1)*vel*Math.random();
-			else if (v_ind < IND.FOR + 3)
-				this.s1[i] = 0;
-			else if (v_ind == IND.MAS)
-				this.s1[i] = map(Math.random(), [0, 1], m_b);
-			else if (v_ind == IND.SIZ)
-				this.s1[i] = map(Math.random(), [0, 1], [30, 60]);
-			else if (v_ind < IND.COL + 4)
-				this.s1[i] = colors[p_ind % colors.length][v_ind - IND.COL];
-
-			this.s2[i] = this.s1[i];
+	this.init = function(){
+		for(let i = 0; i < this.num; i++){
+			let p_state = this.init_single();
+			for(let j = 0; j < IND.FPP; j++){
+				this.s1[i*IND.FPP + j] = p_state[j];
+			}
+			this.s2.set(this.s1);
 		}
-
-		let FC_tri_len = 0;
-		let FC_lin_len = 0;
-		for(let i = 0; i < this.F.length; i++){
-			FC_tri_len += this.F[i].data_len != 0 ? this.F[i].data_len[0] : 0;
-			FC_lin_len += this.F[i].data_len != 0 ? this.F[i].data_len[1] : 0;
-		}
-		for(let i = 0; i < this.C.length; i++){
-			FC_tri_len += this.C[i].data_len != 0 ? this.C[i].data_len[0] : 0;
-			FC_lin_len += this.C[i].data_len != 0 ? this.C[i].data_len[1] : 0;
-		}
-		this.FC_num = {
-			tri: FC_tri_len/FPV,
-			lin: FC_lin_len/FPV,
-			all: (FC_tri_len + FC_lin_len)/FPV
-		};
 	}
 
 	this.applyAllForces = function(s, F){
@@ -86,7 +68,6 @@ function PartSys(num){
 	}
 
 	this.solver = function(elapsed){
-		elapsed *= this.time_factor;
 		// this.s2 = this.euler_e(this.s1, this.s2, elapsed);
 		// this.s2 = this.midpoint_e(this.s1, this.s2, elapsed);
 		// this.s2 = this.euler_i(this.s1, this.s2, elapsed);

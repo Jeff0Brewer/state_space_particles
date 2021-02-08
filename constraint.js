@@ -104,8 +104,9 @@ class BoundConstraint{
 
 
 class AxisConstraint{
-	constructor(axis_ind, offset, coeff, num){
+	constructor(axis_ind, dir, offset, coeff, num){
 		this.ind = axis_ind;
+		this.dir = dir > 0 ? 1 : -1;
 		this.off = offset;
 		this.coeff = -1*Math.abs(coeff);
 		this.num = num;
@@ -117,8 +118,8 @@ class AxisConstraint{
 		for(let n = 0; n < this.num; n++){
 			let p1 = s1[n*IND.FPP + IND.POS + this.ind];
 			let p2 = s2[n*IND.FPP + IND.POS + this.ind];
-			if((this.off > 0 && p1 <= this.off && p2 > this.off) || 
-			   (this.off < 0 && p1 >= this.off && p2 < this.off)){
+			if((this.dir > 0 && p1 <= this.off && p2 > this.off) || 
+			   (this.dir < 0 && p1 >= this.off && p2 < this.off)){
 				s2[n*IND.FPP + IND.POS + this.ind] = this.off;
 				s2[n*IND.FPP + IND.VEL + this.ind] = this.coeff*s2[n*IND.FPP + IND.VEL + this.ind];
 			}

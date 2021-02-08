@@ -1,15 +1,11 @@
 let paused = false;
-let init = {
-	center: [0, 0, 3],
-	size: 3,
-	speed: 2
-}
+let time_factor = 1.0;
 
 function main(){
 	c = document.getElementById('canvas')
 	setup_gl(c);
 
-	cam = new CameraController([-5, -7, 5], init.center, 1.25, .01);
+	cam = new CameraController([-5, -7, 5], [0, 0, 3], 1.25, .01);
 
 	let grid_size = 75;
 	let s = 1.0;
@@ -34,30 +30,47 @@ function main(){
 		}
 	}
 
-	let num_particle = 90;
-	F = [
-		new BoidForcer(8, 5, 8, 50, 1.5, [0, 0, 3], 1.5, num_particle),
-		new DragForcer(.2, num_particle)
-	];
-	// for(let i = 0; i < num_particle - 1; i++){
-	// 	F.push(new SpringForcer(.2, 100, 100, i, i + 1)); 
-	// }
-	C = [
-		// new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 8], 2, 4, .5, num_particle),
-		// new WallConstraint([0, .2, 1], [1, 0, 0], [0, -3, 6], 2, 4, .5, num_particle),
-		// new WallConstraint([0, -.2, 1], [1, 0, 0], [0, 3, 4], 2, 4, .5, num_particle),
-		// new WallConstraint([-.35, 0, 1], [0, 1, 0], [0, -3.5, 2], 2, 2, .5, num_particle),
+	let boid_num = 90;
+	let boid_bound = 3.5;
+	let boid_center = [0, 0, boid_bound];
+	let boid_sys = {
+		num: boid_num,
+		F: [
+			new BoidForcer(8, 5, 8, 50, 1.5, boid_center, 1.5, boid_num),
+			new DragForcer(.2, boid_num)
+		],
+		C: [
+			new BoundConstraint(0, -boid_bound + boid_center[0], boid_bound + boid_center[0], boid_num),
+			new BoundConstraint(1, -boid_bound + boid_center[1], boid_bound + boid_center[1], boid_num),
+			new AxisConstraint(2, -1, -boid_bound + boid_center[2], 1, boid_num),
+			new AxisConstraint(2, 1, boid_bound + boid_center[2], 1, boid_num)
+		],
+		init: function(){
+			let p = [];
+			let v = [];
+			let f = [];
+			let m = [map(Math.random(), [0, 1], [5, 10])];
+			let s = [map(Math.random(), [0, 1], [25, 50])];
+			let c = [.5, .5, .5, 1];
+			c[Math.floor(Math.random()*3)] = 1;
+			for(let i = 0; i < 3; i++){
+				p.push(map(Math.random(), [0, 1], [-boid_bound, boid_bound]) + boid_center[i]);
+				v.push(map(Math.random(), [0, 1], [-2, 2]));
+				f.push(0);
+			}
+			return p.concat(v, f, m, s, c);
+		}
+	};
 
-		new BoundConstraint(0, -3, 3, num_particle),
-		new BoundConstraint(1, -3, 3, num_particle),
-		new AxisConstraint(2, -.05, 1, num_particle),
-		new AxisConstraint(2, 6, 1, num_particle)
+	part_sys = [
+		new PartSys(boid_sys.num, boid_sys.F, boid_sys.C, boid_sys.init)
 	];
-	part_sys = new PartSys(num_particle);
-	part_sys.init(init.center, init.size, init.speed, [5, 10], F, C);
+	for(let i = 0; i < part_sys.length; i++){
+		part_sys[i].init();
+	}
 
 	drawers = [
-		new Drawer([2, 0, 0], [part_sys.num, part_sys.FC_num.tri, part_sys.FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
+		new Drawer([2, 0, 0], [part_sys[0].num, part_sys[0].FC_num.tri, part_sys[0].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([0], [grid.length/FPV], [gl.TRIANGLES])
 	];
 	drawers[1].buffer_data(0, new Float32Array(grid));
@@ -86,11 +99,13 @@ function main(){
 	let timestep = 1000/60;
 	var tick = function(){
 		if(!paused){
-			part_sys.applyAllForces(part_sys.s1, part_sys.F);
-			part_sys.solver(timestep);
-			part_sys.doConstraint(part_sys.s1, part_sys.s2, part_sys.C);
-			part_sys.render(drawers[0]);
-			part_sys.swap();
+			for(let i = 0; i < part_sys.length; i++){
+				part_sys[i].applyAllForces(part_sys[i].s1, part_sys[i].F);
+				part_sys[i].solver(timestep*time_factor);
+				part_sys[i].doConstraint(part_sys[i].s1, part_sys[i].s2, part_sys[i].C);
+				part_sys[i].render(drawers[i]);
+				part_sys[i].swap();
+			}
 		}
 		cam.strafe(timestep);
 		view_matrix.setLookAt(cam.pos[0], cam.pos[1], cam.pos[2], cam.foc[0], cam.foc[1], cam.foc[2], 0, 0, 1);
@@ -148,7 +163,9 @@ function key_down(e){
 			break;
 		case 'R':
 			if(!paused)
-				part_sys.init(init.center, init.size, init.speed, [5, 10], F, C);
+				for(let i = 0; i < part_sys.length; i++){
+					part_sys[i].init();
+				}
 			break;
 		case 'P':
 			paused = !paused;
@@ -174,14 +191,6 @@ function key_up(e){
 	}
 }
 
-document.getElementById('launch_spd').value = init.speed.toFixed(1);
-document.getElementById('launch_spd').onchange = function(){
-	let value = parseFloat(this.value);
-	if(!Number.isNaN(value)){
-		init.speed = value;
-	}
-}
-
 let tf_text = document.getElementById('tf_text');
 let tf_range = document.getElementById('tf_range');
 
@@ -190,20 +199,19 @@ tf_text.onchange = function(){
 	if(!Number.isNaN(value)){
 		value = value > tf_range.max ? tf_range.max : value;
 		value = value < tf_range.min ? tf_range.min : value;
-		part_sys.time_factor = value;
-		tf_range.value = value
+		tf_range.value = value;
+		time_factor = value;
 	}
 }
 
 tf_range.oninput = function(){
-	part_sys.time_factor = this.value;
 	tf_text.value = this.value;
-
+	time_factor = this.value;
 }
 
 tf_range.onchange = function(){
 	if(Math.abs(this.value - 1.0) < .25)
 		this.value = 1.0;
-	part_sys.time_factor = this.value;
 	tf_text.value = this.value;
+	time_factor = this.value;
 }
