@@ -4,7 +4,7 @@ function main(){
 	c = document.getElementById('canvas')
 	setup_gl(c);
 
-	cam = new CameraController([-15, 0, 7], [0, 0, 3], 1.25, .01);
+	cam = new CameraController([-15, 0, 8], [0, 0, 3], 1.25, .01);
 
 	let grid_size = 75;
 	let s = 1.0;
@@ -36,7 +36,7 @@ function main(){
 		num: boid_num,
 		F: [
 			new BoidForcer(8, 6, 8, 50, 1.5, boid_center, 1.5, boid_num),
-			new DragForcer(.1, boid_num)
+			new DragForcer(.3, boid_num)
 		],
 		C: [
 			new BoundConstraint(0, -boid_bound + boid_center[0], boid_bound + boid_center[0], boid_num),
@@ -111,9 +111,11 @@ function main(){
 		init: fire_init
 	}
 
-	let spring_num = 12;
-	let spring_bound = 3.5;
-	let spring_center = [0, -4, spring_bound];
+	let tetra_num = 5;
+	let spring_num = tetra_num*4;
+	let spring_bound = 6;
+	let spring_center = [0, -7, spring_bound];
+	let spring_spawn = [-2, -2, 5];
 	let spring_sys = {
 		num: spring_num,
 		F: [
@@ -121,6 +123,11 @@ function main(){
 			new DragForcer(.8, spring_num)
 		],
 		C: [
+			new WallConstraint([.25, 0, 1], [0, 1, 0], add([-2.5, -2.5, 3], spring_center), 2, 3, .6, spring_num),
+			new WallConstraint([0, .25, 1], [1, 0, 0], add([2.5, -2.5, 1], spring_center), 2, 3, .6, spring_num),
+			new WallConstraint([-.5, 0, 1], [0, 1, 0], add([2.5, 2.5, -1], spring_center), 2, 3, .6, spring_num),
+			new WallConstraint([0, 0, 1], [1, 1, 0], add([-2, 2.5, -4], spring_center), 2.5, 2.5, .6, spring_num),
+
 			new AxisConstraint(0, -1, -spring_bound + spring_center[0], .9, spring_num),
 			new AxisConstraint(0, 1, spring_bound + spring_center[0], .9, spring_num),
 			new AxisConstraint(1, -1, -spring_bound + spring_center[1], .9, spring_num),
@@ -129,7 +136,7 @@ function main(){
 			new AxisConstraint(2, 1, 2*spring_bound, .5, spring_num)
 		],
 		init: function(){
-			let p = spring_center;
+			let p = add(spring_spawn, spring_center);
 			let v = [Math.random(), Math.random(), Math.random()];
 			let f = [0, 0, 0];
 			let m = 5;
@@ -138,11 +145,12 @@ function main(){
 			return p.concat(v, f, m, s, c);
 		}
 	}
-	let connect_ind = [[0, 1], [1, 2], [2, 0], [0, 3], [1, 3], [2, 3],
-					   [4, 5], [5, 6], [6, 4], [4, 7], [5, 7], [6, 7],
-					   [8, 9], [9, 10], [10, 8], [8, 11], [9, 11], [10, 11]];
-	for(let i = 0; i < connect_ind.length; i++){
-		spring_sys.F.push(new SpringForcer(1, 8000, 100, connect_ind[i][0], connect_ind[i][1]));
+	let connect_ind = [[0, 1], [1, 2], [2, 0], [0, 3], [1, 3], [2, 3]];
+	for(let i = 0; i < tetra_num; i++){
+		let spring_len = map(Math.random(), [0, 1], [.75, 1.25]);
+		for(let j = 0; j < connect_ind.length; j++){
+			spring_sys.F.push(new SpringForcer(spring_len, 8000, 100, connect_ind[j][0] + i*4, connect_ind[j][1] + i*4));
+		}
 	}
 
 	part_sys = [

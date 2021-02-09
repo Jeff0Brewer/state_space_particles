@@ -18,9 +18,9 @@ class FireConstraint{
 			p2 = sub(p2, this.c);
 
 			let dm = map(mag(f1), [0, this.f], [0, .0005]);
-			let sz = map(mag(v2), [0, 3], [0, 50]);
+			let sz = map(v2[2], [0, 3], [0, 50]);
 			sz = sz > 50 ? 50 : sz;
-			let color = this.color_map(mag(v2) + s2[n*IND.FPP + IND.MAS]*5, [0, 3]);
+			let color = this.color_map(v2[2] + s2[n*IND.FPP + IND.MAS]*5, [0, 3]);
 
 			s2[n*IND.FPP + IND.MAS] -= dm;
 			s2[n*IND.FPP + IND.SIZ] = sz;
