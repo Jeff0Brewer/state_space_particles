@@ -1,10 +1,44 @@
+class TornadoForcer{
+	constructor(center, min_radius, max_radius, height, tangent_force, perp_force, num){
+		this.num = num;
+		this.c = center;
+		this.r_b = [min_radius, max_radius]
+		this.h = height;
+		this.f = {
+			tan: Math.abs(tangent_force),
+			prp: Math.abs(perp_force)
+		};
+
+		this.data_len = 0;
+	}
+
+	apply_force(s){
+		for(let n = 0; n < this.num; n++){
+			let p = s.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
+			p = sub(p, this.c);
+			if(p[2] < this.h){
+				let p_xy = p.slice(0, 2);
+				p_xy.push(0);
+				let r = map(p[2], [0, this.h], this.r_b)
+				let f_p = map(p[2], [0, this.h], [this.f.prp, 0]);
+				let d_r = Math.abs(mag(p_xy) - r);
+
+				let f = add(mult_scalar(norm(add(norm(cross3(p, [0, 0, 1])), [0, 0, 3])), d_r < r ? map(d_r, [0, r], [this.f.tan, 0]) : 0), mult_scalar(norm(p_xy), -1*f_p));
+				for(let i = 0; i < f.length; i++){
+					s[n*IND.FPP + IND.FOR + i] += f[i];
+				}
+			}
+		}
+	}
+}
+
 class FireForcer{
-	constructor(center, radius, height, heat_force, num){
+	constructor(center, radius, height, force, num){
 		this.num = num
 		this.c = center;
 		this.r = radius;
 		this.h = height;
-		this.f = heat_force;
+		this.f = force;
 
 		this.data_len = 0;
 	}
@@ -24,8 +58,9 @@ class FireForcer{
 }
 
 class BoidForcer{
-	constructor(co_f, al_f, sp_f, av_f, d, center, radius, num){
+	constructor(co_f, al_f, sp_f, av_f, d, speed, center, radius, num){
 		this.num = num;
+		this.s = speed;
 		this.c = center;
 		this.r = radius;
 		this.d = d;
@@ -36,7 +71,7 @@ class BoidForcer{
 			av: av_f
 		};
 
-		let iso = gen_iso(2);
+		let iso = gen_iso(2, 'TRI');
 		let tri = [];
 		let color = [1, 1, 1, 1];
 		for(let i = 0; i < iso.length; i++){
@@ -84,7 +119,7 @@ class BoidForcer{
 				co = mult_scalar(co, 1/count);
 				co = mult_scalar(norm(sub(co, p[n])), this.f.co);
 				sp = mult_scalar(norm(sp), this.f.sp);
-				al = mult_scalar(norm(sub(al, v[n])), this.f.al);
+				al = mult_scalar(norm(sub(mult_scalar(norm(al), this.s), v[n])), this.f.al);
 				for(let j = 0; j < 3; j++){
 					f[j] += co[j] + al[j] + sp[j]; 
 				}

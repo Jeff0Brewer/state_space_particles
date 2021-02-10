@@ -38,6 +38,51 @@ class FireConstraint{
 	}
 }
 
+class SphereConstraint{
+	constructor(center, radius, coeff, num){
+		this.num = num;
+		this.c = center;
+		this.r = radius;
+		this.coeff = -1*Math.abs(coeff);
+
+
+		let iso = gen_iso(1, 'LIN');
+		let lin = [];
+		let color = [1, 1, 1, 1];
+		for(let i = 0; i < iso.length; i++){
+			iso[i] = add(mult_scalar(iso[i], this.r), this.c);
+			lin = lin.concat(iso[i]);
+			lin = lin.concat(color);
+			lin.push(0);
+		}
+
+		this.data = [[], lin];
+		this.data_len = [0, lin.length];
+	}
+
+	constrain(s1, s2){
+		for(let n = 0; n < this.num; n++){
+			let p1 = s1.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
+			let p2 = s2.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
+			if(dist(p1, this.c) >= this.r && dist(p2, this.c) < this.r){
+				let v2 = s2.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
+				let dir = norm(sub(p2, this.c));
+				let v_perp = mult_scalar(dir, dot(v2, dir));
+				v2 = add(sub(v2, v_perp), mult_scalar(v_perp, this.coeff));
+				p2 = add(mult_scalar(dir, this.r), this.c);
+				for(let i = 0; i < 3; i++){
+					s2[n*IND.FPP + IND.POS + i] = p2[i];
+					s2[n*IND.FPP + IND.VEL + i] = v2[i];
+				}
+			}
+		}
+	}
+
+	get_buf_data(s){
+		return this.data;
+	}
+}
+
 class FixConstraint{
 	constructor(particle_ind, position){
 		this.ind = particle_ind;

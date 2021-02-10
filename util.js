@@ -78,7 +78,7 @@ function midpoint(a, b){
 }
 
 //generate an isosphere with given iterations
-function gen_iso(iter){ 
+function gen_iso(iter, mode){ 
 	//init base with 20 sides
 	let f = (1.0 + Math.sqrt(5.0)) / 2.0; 
 	let v = [[-1,f,0],[1,f,0],[-1,-f,0],
@@ -112,10 +112,16 @@ function gen_iso(iter){
 		t = n_t.slice();
 	}
 
-	//return triangles for rendering
 	let o = [];
-	for(let i = 0; i < t.length; i++){
-		o = o.concat([v[t[i][0]]], [v[t[i][1]]], [v[t[i][2]]]);
+	if(mode == 'TRI'){
+		for(let i = 0; i < t.length; i++){
+			o = o.concat([v[t[i][0]]], [v[t[i][1]]], [v[t[i][2]]]);
+		}
+	}
+	if(mode == 'LIN'){
+		for(let i = 0; i < t.length; i++){
+			o = o.concat([v[t[i][0]]], [v[t[i][1]]], [v[t[i][1]]], [v[t[i][2]]], [v[t[i][2]]], [v[t[i][0]]]);
+		}
 	}
 	return o;
 }

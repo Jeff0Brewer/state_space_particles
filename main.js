@@ -4,7 +4,7 @@ function main(){
 	c = document.getElementById('canvas')
 	setup_gl(c);
 
-	cam = new CameraController([-15, 0, 8], [0, 0, 3], 1.25, .01);
+	cam = new CameraController([-15, -18, 8], [0, -18, 3], 1.25, .01);
 
 	let grid_size = 75;
 	let s = 1.0;
@@ -35,7 +35,7 @@ function main(){
 	let boid_sys = {
 		num: boid_num,
 		F: [
-			new BoidForcer(8, 6, 8, 50, 1.5, boid_center, 1.5, boid_num),
+			new BoidForcer(8, 6, 8, 50, 1.5, 3, boid_center, 1.5, boid_num),
 			new DragForcer(.3, boid_num)
 		],
 		C: [
@@ -111,11 +111,12 @@ function main(){
 		init: fire_init
 	}
 
-	let tetra_num = 5;
+	let rad2 = Math.pow(2, .5);
+	let tetra_num = 10;
 	let spring_num = tetra_num*4;
-	let spring_bound = 6;
+	let spring_bound = 7;
 	let spring_center = [0, -7, spring_bound];
-	let spring_spawn = [-2, -2, 5];
+	let spring_spawn = [-2, -2, 6];
 	let spring_sys = {
 		num: spring_num,
 		F: [
@@ -123,10 +124,16 @@ function main(){
 			new DragForcer(.8, spring_num)
 		],
 		C: [
-			new WallConstraint([.25, 0, 1], [0, 1, 0], add([-2.5, -2.5, 3], spring_center), 2, 3, .6, spring_num),
-			new WallConstraint([0, .25, 1], [1, 0, 0], add([2.5, -2.5, 1], spring_center), 2, 3, .6, spring_num),
-			new WallConstraint([-.5, 0, 1], [0, 1, 0], add([2.5, 2.5, -1], spring_center), 2, 3, .6, spring_num),
+			new WallConstraint([.25, 0, 1], [0, 1, 0], add([-2.5, -2.5, 4], spring_center), 2, 3, .6, spring_num),
+			new WallConstraint([0, .25, 1], [1, 0, 0], add([2.5, -2.5, 2], spring_center), 2, 3, .6, spring_num),
+			new WallConstraint([-.4, 0, 1], [0, 1, 0], add([2.5, 2.5, 0], spring_center), 2, 3, .6, spring_num),
 			new WallConstraint([0, 0, 1], [1, 1, 0], add([-2, 2.5, -4], spring_center), 2.5, 2.5, .6, spring_num),
+			new WallConstraint([1, 1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 2.5 + 1.25*rad2, -5], spring_center), 1, 2.5, .6, spring_num),
+			new WallConstraint([-1, -1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 2.5 - 1.25*rad2, -5], spring_center), 1, 2.5, .6, spring_num),
+			new WallConstraint([-1, 1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 2.5 + 1.25*rad2, -5], spring_center), 1, 2.5, .6, spring_num),
+			new WallConstraint([1, -1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 2.5 - 1.25*rad2, -5], spring_center), 1, 2.5, .6, spring_num),
+
+			new SphereConstraint(add([-3, 2.5, -2], spring_center), 2, .9, spring_num),
 
 			new AxisConstraint(0, -1, -spring_bound + spring_center[0], .9, spring_num),
 			new AxisConstraint(0, 1, spring_bound + spring_center[0], .9, spring_num),
@@ -153,10 +160,44 @@ function main(){
 		}
 	}
 
+	let field_num = 1000;
+	let field_bound = 5;
+	let field_center = [0, -19, 0];
+	let field_sys = {
+		num: field_num,
+		F: [
+			new TornadoForcer(field_center, 1, 1.5, 5, 200, 20, field_num),
+			new GravityForcer(-9.8, field_num),
+			new DragForcer(.5, field_num)
+		],
+		C: [
+			new AxisConstraint(0, -1, -field_bound + field_center[0], .95, field_num),
+			new AxisConstraint(0, 1, field_bound + field_center[0], .95, field_num),
+			new AxisConstraint(1, -1, -field_bound + field_center[1], .95, field_num),
+			new AxisConstraint(1, 1, field_bound + field_center[1], .95, field_num),
+			new AxisConstraint(2, -1, 0, .1, field_num),
+			new AxisConstraint(2, 1, 2*field_bound, .95, field_num)
+		],
+		init: function(){
+			let p = [map(Math.random(), [0, 1], [-field_bound, field_bound]),
+					 map(Math.random(), [0, 1], [-field_bound, field_bound]),
+					 map(Math.random(), [0, 1], [0, 2*field_bound])];
+			p = add(field_center, p);
+			let v = [0, 0, 0];
+			let f = [0, 0, 0];
+			let m = map(Math.random(), [0, 1], [1, 3]);
+			let s = map(Math.random(), [0, 1], [20, 100]);
+			let shade = map(Math.random(), [0, 1], [.3, .7]);
+			let c = [shade, shade, shade + map(Math.random(), [0, 1], [.25, .5])];
+			return p.concat(v, f, m, s, c);
+		}
+	}
+
 	part_sys = [
 		new PartSys(boid_sys.num, boid_sys.F, boid_sys.C, boid_sys.init),
 		new PartSys(fire_sys.num, fire_sys.F, fire_sys.C, fire_sys.init),
-		new PartSys(spring_sys.num, spring_sys.F, spring_sys.C, spring_sys.init)
+		new PartSys(spring_sys.num, spring_sys.F, spring_sys.C, spring_sys.init),
+		new PartSys(field_sys.num, field_sys.F, field_sys.C, field_sys.init)
 	];
 	for(let i = 0; i < part_sys.length; i++){
 		part_sys[i].init();
@@ -166,6 +207,7 @@ function main(){
 		new Drawer([2, 0, 0], [part_sys[0].num, part_sys[0].FC_num.tri, part_sys[0].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([3, 0, 0], [part_sys[1].num, part_sys[1].FC_num.tri, part_sys[1].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([1, 0, 0], [part_sys[2].num, part_sys[2].FC_num.tri, part_sys[2].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
+		new Drawer([1, 0, 0], [part_sys[3].num, part_sys[3].FC_num.tri, part_sys[3].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([0], [grid.length/FPV], [gl.TRIANGLES])
 	];
 	drawers[drawers.length - 1].buffer_data(0, new Float32Array(grid));
