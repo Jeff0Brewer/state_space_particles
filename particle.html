@@ -6,8 +6,17 @@
 </head>
 <body onload="main()">
   <canvas id="canvas" width="1000" height="600"></canvas>
-  <div class="description">W, A, S, D: strafe, MOUSE DRAG: look, MOUSE SCROLL: move</div>
-  <div class="description">R: reset, P: pause</div>
+  <div class="ui">
+    <div class="description">W, A, S, D: strafe, MOUSE DRAG: look, MOUSE SCROLL: move</div>
+    <div class="description">R: reset, P: pause</div>
+    <div class="label">Select Solver: </div>
+    <select class="solver_menu" id="solver_menu">
+      <option value="I_Mid">Midpoint Implicit</option>
+      <option value="E_Mid">Midpoint Explicit</option>
+      <option value="I_Eul">Euler Implicit</option>
+      <option value="E_Eul">Euler Explicit</option>
+    </select>
+  </div>
   <script id="v_simple" type="glsl">
     precision mediump float;
 

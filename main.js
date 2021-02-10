@@ -1,10 +1,13 @@
 let paused = false;
+let fovy = 70;
 
 function main(){
-	c = document.getElementById('canvas')
+	c = document.getElementById('canvas');
+	c.width = window.innerWidth;
+	c.height = window.innerHeight;
 	setup_gl(c);
 
-	cam = new CameraController([-15, -18, 8], [0, -18, 3], 1.25, .01);
+	cam = new CameraController([-17, -10, 8], [0, 0, 3], 1.25, .01);
 
 	let grid_size = 75;
 	let s = 1.0;
@@ -31,7 +34,7 @@ function main(){
 
 	let boid_num = 90;
 	let boid_bound = 3.5;
-	let boid_center = [0, 4, boid_bound];
+	let boid_center = [-7, 7, boid_bound];
 	let boid_sys = {
 		num: boid_num,
 		F: [
@@ -49,7 +52,7 @@ function main(){
 			let v = [];
 			let f = [];
 			let m = [map(Math.random(), [0, 1], [5, 10])];
-			let s = [map(Math.random(), [0, 1], [25, 50])];
+			let s = [map(Math.random(), [0, 1], [40, 80])];
 			let c = [.5, .5, .5, 1];
 			c[Math.floor(Math.random()*3)] = 1;
 			for(let i = 0; i < 3; i++){
@@ -63,7 +66,7 @@ function main(){
 
 	let fire_num = 700;
 	let fire_bound = 3.5;
-	let fire_center = [0, 12, 0];
+	let fire_center = [-7, -7, 0];
 	let fire_radius = 1.75;
 	let fire_force = .25;
 	let fire_map = function(val, bound){
@@ -112,28 +115,28 @@ function main(){
 	}
 
 	let rad2 = Math.pow(2, .5);
-	let tetra_num = 10;
+	let tetra_num = 20;
 	let spring_num = tetra_num*4;
 	let spring_bound = 7;
-	let spring_center = [0, -7, spring_bound];
+	let spring_center = [7, 7, spring_bound];
 	let spring_spawn = [-2, -2, 6];
 	let spring_sys = {
 		num: spring_num,
 		F: [
 			new GravityForcer(-9.8, spring_num),
-			new DragForcer(.8, spring_num)
+			new DragForcer(.45, spring_num)
 		],
 		C: [
-			new WallConstraint([.25, 0, 1], [0, 1, 0], add([-2.5, -2.5, 4], spring_center), 2, 3, .6, spring_num),
-			new WallConstraint([0, .25, 1], [1, 0, 0], add([2.5, -2.5, 2], spring_center), 2, 3, .6, spring_num),
-			new WallConstraint([-.4, 0, 1], [0, 1, 0], add([2.5, 2.5, 0], spring_center), 2, 3, .6, spring_num),
-			new WallConstraint([0, 0, 1], [1, 1, 0], add([-2, 2.5, -4], spring_center), 2.5, 2.5, .6, spring_num),
-			new WallConstraint([1, 1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 2.5 + 1.25*rad2, -5], spring_center), 1, 2.5, .6, spring_num),
-			new WallConstraint([-1, -1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 2.5 - 1.25*rad2, -5], spring_center), 1, 2.5, .6, spring_num),
-			new WallConstraint([-1, 1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 2.5 + 1.25*rad2, -5], spring_center), 1, 2.5, .6, spring_num),
-			new WallConstraint([1, -1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 2.5 - 1.25*rad2, -5], spring_center), 1, 2.5, .6, spring_num),
+			new WallConstraint([.25, 0, 1], [0, 1, 0], add([-2.5, -2.5, 4], spring_center), 2, 3, .9, spring_num),
+			new WallConstraint([0, .25, 1], [1, 0, 0], add([2.5, -2.5, 2], spring_center), 2, 3, .9, spring_num),
+			new WallConstraint([-.4, 0, 1], [0, 1, 0], add([2.5, 2.5, 0], spring_center), 2, 3, .9, spring_num),
+			new WallConstraint([0, 0, 1], [1, 1, 0], add([-2, 2.5, -5], spring_center), 2.5, 2.5, .9, spring_num),
+			new WallConstraint([1, 1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 2.5 + 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
+			new WallConstraint([-1, -1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 2.5 - 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
+			new WallConstraint([-1, 1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 2.5 + 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
+			new WallConstraint([1, -1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 2.5 - 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
 
-			new SphereConstraint(add([-3, 2.5, -2], spring_center), 2, .9, spring_num),
+			new SphereConstraint(add([-3, 4, -2], spring_center), 2, .9, spring_num),
 
 			new AxisConstraint(0, -1, -spring_bound + spring_center[0], .9, spring_num),
 			new AxisConstraint(0, 1, spring_bound + spring_center[0], .9, spring_num),
@@ -143,8 +146,8 @@ function main(){
 			new AxisConstraint(2, 1, 2*spring_bound, .5, spring_num)
 		],
 		init: function(){
-			let p = add(spring_spawn, spring_center);
-			let v = [Math.random(), Math.random(), Math.random()];
+			let p = add(add(spring_spawn, spring_center), [Math.random(), Math.random(), Math.random()]);
+			let v = [0, 0, 0];
 			let f = [0, 0, 0];
 			let m = 5;
 			let s = 0;
@@ -156,19 +159,19 @@ function main(){
 	for(let i = 0; i < tetra_num; i++){
 		let spring_len = map(Math.random(), [0, 1], [.75, 1.25]);
 		for(let j = 0; j < connect_ind.length; j++){
-			spring_sys.F.push(new SpringForcer(spring_len, 8000, 100, connect_ind[j][0] + i*4, connect_ind[j][1] + i*4));
+			spring_sys.F.push(new SpringForcer(spring_len, 9000, 120, connect_ind[j][0] + i*4, connect_ind[j][1] + i*4));
 		}
 	}
 
 	let field_num = 1000;
 	let field_bound = 5;
-	let field_center = [0, -19, 0];
+	let field_center = [7, -7, 0];
 	let field_sys = {
 		num: field_num,
 		F: [
-			new TornadoForcer(field_center, 1, 1.5, 5, 200, 20, field_num),
+			new TornadoForcer(field_center, 1.5, 1, 5, 200, 20, field_num),
 			new GravityForcer(-9.8, field_num),
-			new DragForcer(.5, field_num)
+			new DragForcer(.4, field_num)
 		],
 		C: [
 			new AxisConstraint(0, -1, -field_bound + field_center[0], .95, field_num),
@@ -212,11 +215,11 @@ function main(){
 	];
 	drawers[drawers.length - 1].buffer_data(0, new Float32Array(grid));
 
-	var model_matrix = new Matrix4();
-	var view_matrix = new Matrix4();
-	var proj_matrix = new Matrix4();
+	model_matrix = new Matrix4();
+	view_matrix = new Matrix4();
+	proj_matrix = new Matrix4();
 	view_matrix.setLookAt(cam.pos[0], cam.pos[1], cam.pos[2], cam.foc[0], cam.foc[1], cam.foc[2], 0, 0, 1);
-	proj_matrix.setPerspective(70, c.width/c.height, .01, 500);
+	proj_matrix.setPerspective(fovy, c.width/c.height, .01, 500);
 	
 	u_ModelMatrix = [];
 	u_ViewMatrix = [];
@@ -325,5 +328,24 @@ function key_up(e){
 		case 'D':
 			cam.add_strafe([-1, 0]);
 			break;
+	}
+}
+
+document.getElementById('solver_menu').onchange = function(){
+	for(let i = 0; i < part_sys.length; i++){
+		part_sys[i].set_solver(this.value);
+	}
+}
+
+document.body.onresize = function(){
+	c.width = window.innerWidth;
+	c.height = window.innerHeight;
+	if(gl){
+		gl.viewport(0, 0, c.width, c.height);
+		proj_matrix.setPerspective(fovy, c.width/c.height, .01, 500);
+		for(let i = 0; i < mvp_shaders.length; i++){
+			switch_shader(mvp_shaders[i]);
+			gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'u_ProjMatrix'), false, proj_matrix.elements);
+		}
 	}
 }

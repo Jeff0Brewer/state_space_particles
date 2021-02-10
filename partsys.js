@@ -42,6 +42,7 @@ function PartSys(num, F, C, init){
 			}
 			this.s2.set(this.s1);
 		}
+		this.curr_solver = this.midpoint_i;
 	}
 
 	this.applyAllForces = function(s, F){
@@ -68,10 +69,24 @@ function PartSys(num, F, C, init){
 	}
 
 	this.solver = function(elapsed){
-		// this.s2 = this.euler_e(this.s1, this.s2, elapsed);
-		// this.s2 = this.midpoint_e(this.s1, this.s2, elapsed);
-		// this.s2 = this.euler_i(this.s1, this.s2, elapsed);
-		this.s2 = this.midpoint_i(this.s1, this.s2, elapsed);
+		this.s2 = this.curr_solver(this.s1, this.s2, elapsed);
+	}
+
+	this.set_solver = function(id){
+		switch(id){
+			case "E_Eul":
+				this.curr_solver = this.euler_e;
+				break;
+			case "I_Eul":
+				this.curr_solver = this.euler_i;
+				break;
+			case "E_Mid":
+				this.curr_solver = this.midpoint_e;
+				break;
+			case "I_Mid":
+				this.curr_solver = this.midpoint_i;
+				break;
+		}
 	}
 
 	this.euler_e = function(s1, s2, elapsed){
