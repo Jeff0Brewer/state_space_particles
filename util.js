@@ -69,6 +69,16 @@ function dist_point_plane(pt, cnst){
 	return (cnst[0]*pt[0] + cnst[1]*pt[1] + cnst[2]*pt[2] + cnst[3])/Math.sqrt(cnst[0]*cnst[0] + cnst[1]*cnst[1] + cnst[2]*cnst[2]);
 }
 
+//check ray plane collision
+function check_ray_plane(normal, center, ray_dir, ray_pos){
+	let d = dot(normal, ray_dir);
+	if(Math.abs(d) > .0000001){
+		if(dot(sub(center, ray_pos), normal) / d > 0)
+			return true;
+	}
+	return false;
+}
+
 //find midpoint of two vectors
 function midpoint(a, b){ 
 	let o = [];

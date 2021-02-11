@@ -7,8 +7,6 @@ function main(){
 	c.height = window.innerHeight;
 	setup_gl(c);
 
-	cam = new CameraController([-17, -10, 8], [0, 0, 3], 1.25, .01);
-
 	let grid_size = 75;
 	let s = 1.0;
 	let z = -.1;
@@ -115,28 +113,29 @@ function main(){
 	}
 
 	let rad2 = Math.pow(2, .5);
-	let tetra_num = 20;
+	let tetra_num = 10;
 	let spring_num = tetra_num*4;
 	let spring_bound = 7;
 	let spring_center = [7, 7, spring_bound];
-	let spring_spawn = [-2, -2, 6];
+	let spring_spawn = [-2, -4, 6];
 	let spring_sys = {
 		num: spring_num,
 		F: [
 			new GravityForcer(-9.8, spring_num),
-			new DragForcer(.45, spring_num)
+			new DragForcer(.4, spring_num)
 		],
 		C: [
-			new WallConstraint([.25, 0, 1], [0, 1, 0], add([-2.5, -2.5, 4], spring_center), 2, 3, .9, spring_num),
-			new WallConstraint([0, .25, 1], [1, 0, 0], add([2.5, -2.5, 2], spring_center), 2, 3, .9, spring_num),
-			new WallConstraint([-.4, 0, 1], [0, 1, 0], add([2.5, 2.5, 0], spring_center), 2, 3, .9, spring_num),
-			new WallConstraint([0, 0, 1], [1, 1, 0], add([-2, 2.5, -5], spring_center), 2.5, 2.5, .9, spring_num),
-			new WallConstraint([1, 1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 2.5 + 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
-			new WallConstraint([-1, -1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 2.5 - 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
-			new WallConstraint([-1, 1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 2.5 + 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
-			new WallConstraint([1, -1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 2.5 - 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
+			new WallConstraint([.25, 0, 1], [0, 1, 0], add([-2.5, -4, 4], spring_center), 2, 3, .9, spring_num),
+			new WallConstraint([0, .25, 1], [1, 0, 0], add([2.5, -4, 2], spring_center), 2, 3, .9, spring_num),
+			new WallConstraint([-.4, 0, 1], [0, 1, 0], add([2.5, 1, 0], spring_center), 2, 3, .9, spring_num),
 
-			new SphereConstraint(add([-3, 4, -2], spring_center), 2, .9, spring_num),
+			new WallConstraint([0, 0, 1], [1, 1, 0], add([-2, 3, -5], spring_center), 2.5, 2.5, .9, spring_num),
+			new WallConstraint([1, 1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 3 + 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
+			new WallConstraint([-1, -1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 3 - 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
+			new WallConstraint([-1, 1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 3 + 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
+			new WallConstraint([1, -1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 3 - 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
+
+			new SphereConstraint(add([-2.5, 3, -2], spring_center), 2, .9, spring_num),
 
 			new AxisConstraint(0, -1, -spring_bound + spring_center[0], .9, spring_num),
 			new AxisConstraint(0, 1, spring_bound + spring_center[0], .9, spring_num),
@@ -159,7 +158,7 @@ function main(){
 	for(let i = 0; i < tetra_num; i++){
 		let spring_len = map(Math.random(), [0, 1], [.75, 1.25]);
 		for(let j = 0; j < connect_ind.length; j++){
-			spring_sys.F.push(new SpringForcer(spring_len, 9000, 120, connect_ind[j][0] + i*4, connect_ind[j][1] + i*4));
+			spring_sys.F.push(new SpringForcer(spring_len, 10000, 100, connect_ind[j][0] + i*4, connect_ind[j][1] + i*4));
 		}
 	}
 
@@ -189,12 +188,15 @@ function main(){
 			let v = [0, 0, 0];
 			let f = [0, 0, 0];
 			let m = map(Math.random(), [0, 1], [1, 3]);
-			let s = map(Math.random(), [0, 1], [20, 100]);
+			let s = map(Math.random(), [0, 1], [50, 150]);
 			let shade = map(Math.random(), [0, 1], [.3, .7]);
 			let c = [shade, shade, shade + map(Math.random(), [0, 1], [.25, .5])];
 			return p.concat(v, f, m, s, c);
 		}
 	}
+
+	cam = new CameraController([-17, -5, 8], [0, 0, 3], 1.25, .01);
+	sys_highlight = new SysHighlight([spring_center, add(field_center, [0, 0, field_bound]), add(fire_center, [0, 0, fire_bound]), boid_center], [spring_bound, field_bound, fire_bound, boid_bound]);
 
 	part_sys = [
 		new PartSys(boid_sys.num, boid_sys.F, boid_sys.C, boid_sys.init),
@@ -211,9 +213,10 @@ function main(){
 		new Drawer([3, 0, 0], [part_sys[1].num, part_sys[1].FC_num.tri, part_sys[1].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([1, 0, 0], [part_sys[2].num, part_sys[2].FC_num.tri, part_sys[2].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([1, 0, 0], [part_sys[3].num, part_sys[3].FC_num.tri, part_sys[3].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
-		new Drawer([0], [grid.length/FPV], [gl.TRIANGLES])
+		new Drawer([0], [grid.length/FPV], [gl.TRIANGLES]),
+		new Drawer([0], [sys_highlight.data.length/FPV], [gl.LINES])
 	];
-	drawers[drawers.length - 1].buffer_data(0, new Float32Array(grid));
+	drawers[drawers.length - 2].buffer_data(0, new Float32Array(grid));
 
 	model_matrix = new Matrix4();
 	view_matrix = new Matrix4();
@@ -247,12 +250,16 @@ function main(){
 				part_sys[i].swap();
 			}
 		}
+
 		cam.strafe(timestep);
 		view_matrix.setLookAt(cam.pos[0], cam.pos[1], cam.pos[2], cam.foc[0], cam.foc[1], cam.foc[2], 0, 0, 1);
 		for(let i = 0; i < mvp_shaders.length; i++){
 			switch_shader(mvp_shaders[i]);
 			gl.uniformMatrix4fv(u_ViewMatrix[i], false, view_matrix.elements);
 		}
+
+		sys_highlight.update(cam.pos, cam.foc);
+		sys_highlight.render(drawers[drawers.length - 1]);
 
 		draw();
 	}

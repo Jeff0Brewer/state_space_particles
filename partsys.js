@@ -89,6 +89,8 @@ function PartSys(num, F, C, init){
 		}
 	}
 
+	
+
 	this.euler_e = function(s1, s2, elapsed){
 		let out = new Float32Array(IND.FPP*this.num);
 		let s1dot = this.dotFinder(s1);
