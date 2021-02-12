@@ -9,7 +9,7 @@ function main(){
 
 	let grid_size = 75;
 	let s = 1.0;
-	let z = -.1;
+	let z = -.001;
 	let sq = [
 		0, 0, z, 0, 0, 0, 1, 0,
 		0, s, z, 0, 0, 0, 1, 0,
@@ -64,7 +64,7 @@ function main(){
 
 	let fire_num = 700;
 	let fire_bound = 3.5;
-	let fire_center = [-7, -7, 0];
+	let fire_center = [-5, -5, 0];
 	let fire_radius = 1.75;
 	let fire_force = .25;
 	let fire_map = function(val, bound){
@@ -116,7 +116,7 @@ function main(){
 	let tetra_num = 10;
 	let spring_num = tetra_num*4;
 	let spring_bound = 7;
-	let spring_center = [7, 7, spring_bound];
+	let spring_center = [7.5, 6.5, spring_bound];
 	let spring_spawn = [-2, -4, 6];
 	let spring_sys = {
 		num: spring_num,
@@ -158,13 +158,13 @@ function main(){
 	for(let i = 0; i < tetra_num; i++){
 		let spring_len = map(Math.random(), [0, 1], [.75, 1.25]);
 		for(let j = 0; j < connect_ind.length; j++){
-			spring_sys.F.push(new SpringForcer(spring_len, 10000, 100, connect_ind[j][0] + i*4, connect_ind[j][1] + i*4));
+			spring_sys.F.push(new SpringForcer(spring_len, 9000, 110, connect_ind[j][0] + i*4, connect_ind[j][1] + i*4));
 		}
 	}
 
 	let field_num = 1000;
 	let field_bound = 5;
-	let field_center = [7, -7, 0];
+	let field_center = [6.5, -8.5, 0];
 	let field_sys = {
 		num: field_num,
 		F: [
@@ -195,7 +195,7 @@ function main(){
 		}
 	}
 
-	cam = new CameraController([-17, -5, 8], [0, 0, 3], 1.25, .01);
+	cam = new CameraController([-17, -5, 8], [0, 2, 4], 1.25, .01);
 	sys_highlight = new SysHighlight([spring_center, add(field_center, [0, 0, field_bound]), add(fire_center, [0, 0, fire_bound]), boid_center], [spring_bound, field_bound, fire_bound, boid_bound]);
 
 	part_sys = [

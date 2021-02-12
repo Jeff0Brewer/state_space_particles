@@ -1,6 +1,7 @@
 class SysHighlight{
 	constructor(centers, bounds){
 		this.c = centers;
+		this.b = bounds;
 		this.ind = -1;
 		this.boxes = [];
 		let inds = [0, 1, 1, 3, 3, 2, 2, 0, 0, 4, 1, 5, 2, 6, 3, 7, 4, 5, 5, 7, 7, 6, 6, 4];
@@ -36,14 +37,19 @@ class SysHighlight{
 
 	update(cam_pos, cam_foc){
 		let collided = [];
-		let d = 10000000;
 		this.ind = -1;
 		for(let i = 0; i < this.c.length; i++){
 			let d_c = dist_point_line(this.c[i], cam_pos, cam_foc);
-			if(d_c < d){
-				this.data = this.boxes[i];
-				this.ind = i;
-				d = d_c;
+			if(d_c < this.b[i]*1.5){
+				collided.push([dist(this.c[i], cam_pos), i]);
+			}
+		}
+		let d = 100000000;
+		for(let i = 0; i < collided.length; i++){
+			if(collided[i][0] < d){
+				d = collided[i][0];
+				this.ind = collided[i][1];
+				this.data = this.boxes[this.ind];
 			}
 		}
 	}
