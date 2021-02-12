@@ -189,7 +189,7 @@ function main(){
 			let f = [0, 0, 0];
 			let m = map(Math.random(), [0, 1], [1, 3]);
 			let s = map(Math.random(), [0, 1], [50, 150]);
-			let shade = map(Math.random(), [0, 1], [.3, .7]);
+			let shade = map(Math.random(), [0, 1], [.5, .7]);
 			let c = [shade, shade, shade + map(Math.random(), [0, 1], [.25, .5])];
 			return p.concat(v, f, m, s, c);
 		}
