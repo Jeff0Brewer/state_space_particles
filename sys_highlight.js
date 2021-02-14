@@ -1,7 +1,8 @@
 class SysHighlight{
-	constructor(centers, bounds){
+	constructor(centers, bounds, switch_function){
 		this.c = centers;
 		this.b = bounds;
+		this.switch_func = switch_function;
 		this.ind = -1;
 		this.boxes = [];
 		let inds = [0, 1, 1, 3, 3, 2, 2, 0, 0, 4, 1, 5, 2, 6, 3, 7, 4, 5, 5, 7, 7, 6, 6, 4];
@@ -36,8 +37,8 @@ class SysHighlight{
 	}
 
 	update(cam_pos, cam_foc){
+		let last_ind = this.ind;
 		let collided = [];
-		this.ind = -1;
 		for(let i = 0; i < this.c.length; i++){
 			let d_c = dist_point_line(this.c[i], cam_pos, cam_foc);
 			if(d_c < this.b[i]*1.5){
@@ -51,6 +52,9 @@ class SysHighlight{
 				this.ind = collided[i][1];
 				this.data = this.boxes[this.ind];
 			}
+		}
+		if(this.ind != last_ind){
+			this.switch_func(this.ind);
 		}
 	}
 

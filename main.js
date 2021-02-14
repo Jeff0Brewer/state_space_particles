@@ -36,6 +36,7 @@ function main(){
 	let boid_sys = {
 		num: boid_num,
 		F: [
+			new AllForcer(0, [1, 0, 0], boid_num),
 			new BoidForcer(8, 6, 8, 50, 1.5, 3, boid_center, 1.5, boid_num),
 			new DragForcer(.3, boid_num)
 		],
@@ -96,6 +97,7 @@ function main(){
 	let fire_sys = {
 		num: fire_num,
 		F: [
+			new AllForcer(0, [1, 0, 0], fire_num),
 			new FireForcer(fire_center, fire_radius, 3, fire_force, fire_num),
 			new GravityForcer(-9.8, fire_num),
 			new DragForcer(.002, fire_num)
@@ -121,6 +123,7 @@ function main(){
 	let spring_sys = {
 		num: spring_num,
 		F: [
+			new AllForcer(0, [1, 0, 0], spring_num),
 			new GravityForcer(-9.8, spring_num),
 			new DragForcer(.4, spring_num)
 		],
@@ -168,6 +171,7 @@ function main(){
 	let field_sys = {
 		num: field_num,
 		F: [
+			new AllForcer(0, [1, 0, 0], field_num),
 			new TornadoForcer(field_center, 1.5, 1, 5, 200, 20, field_num),
 			new GravityForcer(-9.8, field_num),
 			new DragForcer(.4, field_num)
@@ -195,23 +199,27 @@ function main(){
 		}
 	}
 
-	cam = new CameraController([-17, -5, 8], [0, 2, 4], 1.25, .01);
-	sys_highlight = new SysHighlight([spring_center, add(field_center, [0, 0, field_bound]), add(fire_center, [0, 0, fire_bound]), boid_center], [spring_bound, field_bound, fire_bound, boid_bound]);
+	cam = new CameraController([-17, -5, 8], [0, 2, 5], 1.25, .01);
+	sys_highlight = new SysHighlight(
+		[add(field_center, [0, 0, field_bound]), boid_center, add(fire_center, [0, 0, fire_bound]), spring_center], 
+		[field_bound, boid_bound, fire_bound, spring_bound],
+		set_wind_state
+	);
 
 	part_sys = [
+		new PartSys(field_sys.num, field_sys.F, field_sys.C, field_sys.init),
 		new PartSys(boid_sys.num, boid_sys.F, boid_sys.C, boid_sys.init),
 		new PartSys(fire_sys.num, fire_sys.F, fire_sys.C, fire_sys.init),
-		new PartSys(spring_sys.num, spring_sys.F, spring_sys.C, spring_sys.init),
-		new PartSys(field_sys.num, field_sys.F, field_sys.C, field_sys.init)
+		new PartSys(spring_sys.num, spring_sys.F, spring_sys.C, spring_sys.init)
 	];
 	for(let i = 0; i < part_sys.length; i++){
 		part_sys[i].init();
 	}
 
 	drawers = [
-		new Drawer([2, 0, 0], [part_sys[0].num, part_sys[0].FC_num.tri, part_sys[0].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
-		new Drawer([3, 0, 0], [part_sys[1].num, part_sys[1].FC_num.tri, part_sys[1].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
-		new Drawer([1, 0, 0], [part_sys[2].num, part_sys[2].FC_num.tri, part_sys[2].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
+		new Drawer([1, 0, 0], [part_sys[0].num, part_sys[0].FC_num.tri, part_sys[0].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
+		new Drawer([2, 0, 0], [part_sys[1].num, part_sys[1].FC_num.tri, part_sys[1].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
+		new Drawer([3, 0, 0], [part_sys[2].num, part_sys[2].FC_num.tri, part_sys[2].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([1, 0, 0], [part_sys[3].num, part_sys[3].FC_num.tri, part_sys[3].FC_num.lin], [gl.POINTS, gl.TRIANGLES, gl.LINES]),
 		new Drawer([0], [grid.length/FPV], [gl.TRIANGLES]),
 		new Drawer([0], [sys_highlight.data.length/FPV], [gl.LINES])
@@ -336,6 +344,38 @@ function key_up(e){
 			cam.add_strafe([-1, 0]);
 			break;
 	}
+}
+
+let wind_dx = document.getElementById('wind_dx');
+let wind_dy = document.getElementById('wind_dy');
+let wind_dz = document.getElementById('wind_dz');
+let wind_mag = document.getElementById('wind_mag');
+
+wind_mag.onchange = function(){
+	let value = parseFloat(this.value);
+	if(sys_highlight.ind != -1 && !Number.isNaN(value)){
+		part_sys[sys_highlight.ind].F[0].set_mag(value);
+	}
+}
+
+let wind_dir = function(){
+	let dx = parseFloat(wind_dx.value);
+	let dy = parseFloat(wind_dy.value);
+	let dz = parseFloat(wind_dz.value);
+	if(sys_highlight.ind != -1 && !Number.isNaN(dx) && !Number.isNaN(dy) && !Number.isNaN(dz)){
+		part_sys[sys_highlight.ind].F[0].set_dir([dx, dy, dz]);
+	}
+}
+
+wind_dx.onchange = wind_dir;
+wind_dy.onchange = wind_dir;
+wind_dz.onchange = wind_dir;
+
+set_wind_state = function(ind){
+	wind_dx.value = part_sys[ind].F[0].dir[0];
+	wind_dy.value = part_sys[ind].F[0].dir[1];
+	wind_dz.value = part_sys[ind].F[0].dir[2];
+	wind_mag.value = part_sys[ind].F[0].mag;
 }
 
 document.getElementById('solver_menu').onchange = function(){

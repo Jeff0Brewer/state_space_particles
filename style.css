@@ -5,6 +5,7 @@ body{
 	color: white;
 	font-family: Arial;
 	font-size: 15px;
+	line-height: 20px;
 }
 
 canvas{
@@ -19,6 +20,17 @@ canvas{
 
 .description{
 	margin: 10px;
+	line-height: 15px;
+}
+
+.force_text{
+	font-size: 13px;
+}
+
+.input{
+	float: left;
+	height: 11px;
+	width: 25px;
 }
 
 .label{

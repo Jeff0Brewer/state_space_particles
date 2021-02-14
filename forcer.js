@@ -200,6 +200,33 @@ class SingleForcer{
 
 }
 
+class AllForcer{
+	constructor(magnitude, direction, num){
+		this.num = num;
+		this.mag = Math.abs(magnitude);
+		this.dir = norm(direction);
+
+		this.data_len = 0;
+	}
+
+	set_mag(magnitude){
+		this.mag = Math.abs(magnitude);
+	}
+
+	set_dir(direction){
+		this.dir = norm(direction);
+	}
+
+	apply_force(s){
+		for(let n = 0; n < this.num; n++){
+			let f = mult_scalar(this.dir, this.mag);
+			for(let i = 0; i < f.length; i++){
+				s[n*IND.FPP + IND.FOR + i] += f[i];
+			}
+		}
+	}
+}
+
 class GravityForcer{
 	constructor(val, num){
 		this.g = val;
