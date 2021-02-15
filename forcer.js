@@ -180,6 +180,30 @@ class SpringForcer{
 	}
 }
 
+class AttractionForcer{
+	constructor(pos, force, num){
+		this.num = num;
+		this.p = pos;
+		this.f = force;
+
+		this.data_len = 0;
+	}
+
+	set_force(force){
+		this.f = force;
+	}
+
+	apply_force(s){
+		for(let n = 0; n < this.num; n++){
+			let p = s.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
+			let f = mult_scalar(norm(sub(this.p, p)), this.f);
+			for(let i = 0; i < f.length; i++){
+				s[n*IND.FPP + IND.FOR + i] += f[i];
+			}
+		}
+	}
+}
+
 class SingleForcer{
 	constructor(particle_ind, force){
 		this.ind = particle_ind;

@@ -19,14 +19,22 @@
     <br>
     <br>
     <div id="force_menu">
-      <div class="description">WIND FORCE:</div>
-      <div class="label">magnitude:</div>
-      <input class="input" type="text" id="wind_mag" value="0"/>
+      <div id="wind_menu" class="">
+        <div class="description">WIND FORCE:</div>
+        <div class="label">magnitude:</div>
+        <input class="input" type="text" id="wind_mag" value="0"/>
+        <br>
+        <div class="label">direction:</div>
+        <input class="input" type="text" id="wind_dx" value="1"/>
+        <input class="input" type="text" id="wind_dy" value="0"/>
+        <input class="input" type="text" id="wind_dz" value="0"/>
+      </div>
       <br>
-      <div class="label">direction:</div>
-      <input class="input" type="text" id="wind_dx" value="1"/>
-      <input class="input" type="text" id="wind_dy" value="0"/>
-      <input class="input" type="text" id="wind_dz" value="0"/>
+      <div id="attract_menu" class="">
+        <div class="description">ATTRACT FORCE:</div>
+        <div class="label">magnitude:</div>
+        <input class="input" type="text" id="attract_mag" value="0"/>
+      </div>
     </div>
   </div>
   <script id="v_simple" type="glsl">

@@ -33,14 +33,17 @@ function main(){
 	let boid_num = 90;
 	let boid_bound = 3.5;
 	let boid_center = [-7, 7, boid_bound];
+	let boid_radius = 1.5;
 	let boid_sys = {
 		num: boid_num,
 		F: [
 			new AllForcer(0, [1, 0, 0], boid_num),
-			new BoidForcer(8, 6, 8, 50, 1.5, 3, boid_center, 1.5, boid_num),
+			new AttractionForcer(boid_center, 0, boid_num),
+			new BoidForcer(8, 6, 8, 50, 1.5, 3, boid_center, boid_radius, boid_num),
 			new DragForcer(.3, boid_num)
 		],
 		C: [
+			new SphereConstraint(boid_center, boid_radius, .9, boid_num),
 			new BoundConstraint(0, -boid_bound + boid_center[0], boid_bound + boid_center[0], boid_num),
 			new BoundConstraint(1, -boid_bound + boid_center[1], boid_bound + boid_center[1], boid_num),
 			new AxisConstraint(2, -1, 0, 1, boid_num),
@@ -121,6 +124,7 @@ function main(){
 	}
 
 	let rad2 = Math.pow(2, .5);
+	let sphere_center = [-2.5, 3, -2];
 	let tetra_num = 10;
 	let spring_num = tetra_num*4;
 	let spring_bound = 7;
@@ -130,6 +134,7 @@ function main(){
 		num: spring_num,
 		F: [
 			new AllForcer(0, [1, 0, 0], spring_num),
+			new AttractionForcer(add(sphere_center, spring_center), 0, spring_num),
 			new GravityForcer(-9.8, spring_num),
 			new DragForcer(.4, spring_num)
 		],
@@ -144,7 +149,7 @@ function main(){
 			new WallConstraint([-1, 1, 0], [0, 0, 1], add([-2 - 1.25*rad2, 3 + 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
 			new WallConstraint([1, -1, 0], [0, 0, 1], add([-2 + 1.25*rad2, 3 - 1.25*rad2, -6], spring_center), 1, 2.5, .9, spring_num),
 
-			new SphereConstraint(add([-2.5, 3, -2], spring_center), 2, .9, spring_num),
+			new SphereConstraint(add(sphere_center, spring_center), 2, .9, spring_num),
 
 			new AxisConstraint(0, -1, -spring_bound + spring_center[0], .9, spring_num),
 			new AxisConstraint(0, 1, spring_bound + spring_center[0], .9, spring_num),
@@ -211,7 +216,7 @@ function main(){
 	sys_highlight = new SysHighlight(
 		[add(field_center, [0, 0, field_bound]), boid_center, add(fire_center, [0, 0, fire_bound]), spring_center], 
 		[field_bound, boid_bound, fire_bound, spring_bound],
-		set_wind_state
+		set_menu_state
 	);
 
 	part_sys = [
@@ -379,11 +384,46 @@ wind_dx.onchange = wind_dir;
 wind_dy.onchange = wind_dir;
 wind_dz.onchange = wind_dir;
 
-set_wind_state = function(ind){
-	wind_dx.value = part_sys[ind].F[0].dir[0];
-	wind_dy.value = part_sys[ind].F[0].dir[1];
-	wind_dz.value = part_sys[ind].F[0].dir[2];
-	wind_mag.value = part_sys[ind].F[0].mag;
+let attract_mag = document.getElementById('attract_mag');
+attract_mag.onchange = function(){
+	let value = parseFloat(this.value);
+	if(sys_highlight.ind != -1 && !Number.isNaN(value)){
+		part_sys[sys_highlight.ind].F[1].set_force(value);
+	}
+}
+
+let sys_forces = {
+	wind: [true, true, true, true],
+	attract: [false, true, false, true]
+}
+let wind_menu = document.getElementById('wind_menu');
+let attract_menu = document.getElementById('attract_menu');
+set_menu_state = function(ind){
+	if(sys_forces.wind[ind]){
+		if(wind_menu.classList.contains('hidden')){
+			wind_menu.classList.remove('hidden');
+		}
+		wind_dx.value = part_sys[ind].F[0].dir[0];
+		wind_dy.value = part_sys[ind].F[0].dir[1];
+		wind_dz.value = part_sys[ind].F[0].dir[2];
+		wind_mag.value = part_sys[ind].F[0].mag;
+	}
+	else{
+		if(!wind_menu.classList.contains('hidden')){
+			wind_menu.classList.add('hidden');
+		}
+	}
+	if(sys_forces.attract[ind]){
+		if(attract_menu.classList.contains('hidden')){
+			attract_menu.classList.remove('hidden');
+		}
+		attract_mag.value = part_sys[ind].F[1].f;
+	}
+	else{
+		if(!attract_menu.classList.contains('hidden')){
+			attract_menu.classList.add('hidden');
+		}
+	}
 }
 
 document.getElementById('solver_menu').onchange = function(){

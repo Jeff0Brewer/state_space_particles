@@ -51,3 +51,10 @@ canvas{
 .ui{
 	position: absolute;
 }
+
+.hidden{
+	visibility: hidden;
+	position: absolute;
+	width: 0;
+	height: 0;
+}
