@@ -55,9 +55,9 @@ class SphereConstraint{
 
 	constrain(s1, s2){
 		for(let n = 0; n < this.num; n++){
-			let p1 = s1.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
 			let p2 = s2.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
-			if(dist(p1, this.c) >= this.r && dist(p2, this.c) < this.r){
+			let v2 = s2.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
+			if(dist(p2, this.c) < this.r && dot(sub(p2, this.c), v2) < 0){
 				let v2 = s2.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
 				let dir = norm(sub(p2, this.c));
 				let v_perp = mult_scalar(dir, dot(v2, dir));
