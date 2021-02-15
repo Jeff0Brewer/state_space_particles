@@ -79,7 +79,7 @@ function main(){
 		let per = (val - bound[0])/(bound[1] - bound[0]);
 
 		let ind = Math.floor(per*(colors.length - 1));
-		ind = ind > colors.length - 1 ? colors.length - 1 : ind;
+		ind = ind > colors.length - 2 ? colors.length - 2 : ind;
 		ind = ind < 0 ? 0 : ind;
 		per = per*(colors.length - 1) - ind;
 		let color = [];
