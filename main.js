@@ -129,7 +129,7 @@ function main(){
 	let spring_num = tetra_num*4;
 	let spring_bound = 7;
 	let spring_center = [7.5, 6.5, spring_bound];
-	let spring_spawn = [-2, -4, 6];
+	let spring_spawn = [-2, -4, 5.5];
 	let spring_sys = {
 		num: spring_num,
 		F: [
