@@ -47,7 +47,7 @@ class FireForcer{
 		for(let n = 0; n < this.num; n++){
 			let p = s.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
 			p = sub(p, this.c);
-			let heat_mag = map(p[2], [0, this.h], [map(mag(p.slice(0, 2)), [0, this.r], [this.f, 0]), 0]);
+			let heat_mag = map(p[2], [0, this.h], [map(mag(p.slice(0, 2)), [0, this.r], [this.f, this.f/2]), 0]);
 			heat_mag = heat_mag > 0 ? heat_mag : 0;
 			let f = mult_scalar([0, 0, 1], heat_mag);
 			for(let i = 0; i < f.length; i++){

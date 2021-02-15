@@ -52,6 +52,7 @@ function main(){
 			let f = [];
 			let m = [map(Math.random(), [0, 1], [5, 10])];
 			let s = [map(Math.random(), [0, 1], [40, 80])];
+			let l = 0;
 			let c = [.5, .5, .5, 1];
 			c[Math.floor(Math.random()*3)] = 1;
 			for(let i = 0; i < 3; i++){
@@ -59,24 +60,28 @@ function main(){
 				v.push(map(Math.random(), [0, 1], [-2, 2]));
 				f.push(0);
 			}
-			return p.concat(v, f, m, s, c);
+			return p.concat(v, f, m, s, l, c);
 		}
 	};
 
 	let fire_num = 700;
 	let fire_bound = 3.5;
 	let fire_center = [-5, -5, 0];
-	let fire_radius = 1.75;
-	let fire_force = .25;
+	let fire_radius = 1;
+	let fire_force = .5;
+	let fire_mass = .02;
+	let fire_size = 150;
+	let fire_life = .75;
 	let fire_map = function(val, bound){
-		let colors = [[0, 0, 0], [.3, .3, .3], [.5, 0, 0], [1, 0, 0], [1, .5, 0]];
+		let colors = [[.7, .7, .25], [1, 1, .25], [1, .5, 0], [1, 0, 0], [.5, 0, 0], [.3, .3, .3], [0, 0, 0]];
+		val = val < bound[0] ? bound[0] : val;
+		val = val > bound[1] ? bound[1] : val;
 		let per = (val - bound[0])/(bound[1] - bound[0]);
-		if(per < 0)
-			return colors[0];
-		if(per > 1)
-			return colors[colors.length - 1];
-		let ind = Math.floor(per * (colors.length - 1));
-		per = Math.abs(ind - per)*colors.length;
+
+		let ind = Math.floor(per*(colors.length - 1));
+		ind = ind > colors.length - 1 ? colors.length - 1 : ind;
+		ind = ind < 0 ? 0 : ind;
+		per = per*(colors.length - 1) - ind;
 		let color = [];
 		for(let i = 0; i < 3; i++){
 			color.push(map(per, [0, 1], [colors[ind][i], colors[ind + 1][i]]));
@@ -89,10 +94,11 @@ function main(){
 		let p = add(fire_center, [Math.cos(angle)*radius, Math.sin(angle)*radius, 0]);
 		let v = mult_scalar(norm([Math.random()*1 - .5, Math.random()*1 - .5, 1]), Math.random()*4 + 1);
 		let f = [0, 0, 0];
-		let m = map(Math.random(), [0, 1], [.01, .02]);
-		let s = map(Math.random(), [0, 1], [25, 50]);
+		let m = fire_mass;
+		let s = fire_size;
+		let l = .2*fire_life*Math.random();
 		let c = [1, 0, 0, 1];
-		return p.concat(v, f, m, s, c);
+		return p.concat(v, f, m, s, l, c);
 	}
 	let fire_sys = {
 		num: fire_num,
@@ -103,7 +109,7 @@ function main(){
 			new DragForcer(.002, fire_num)
 		],
 		C: [
-			new FireConstraint(fire_center, fire_radius, fire_force, fire_map, fire_init, fire_num),
+			new FireConstraint(fire_life, fire_mass, fire_size, fire_map, fire_init, fire_num),
 			new AxisConstraint(0, -1, -fire_bound + fire_center[0], .5, fire_num),
 			new AxisConstraint(0, 1, fire_bound + fire_center[0], .5, fire_num),
 			new AxisConstraint(1, -1, -fire_bound + fire_center[1], .5, fire_num),
@@ -153,8 +159,9 @@ function main(){
 			let f = [0, 0, 0];
 			let m = 5;
 			let s = 0;
+			let l = 0;
 			let c = [1, 1, 1, 1];
-			return p.concat(v, f, m, s, c);
+			return p.concat(v, f, m, s, l, c);
 		}
 	}
 	let connect_ind = [[0, 1], [1, 2], [2, 0], [0, 3], [1, 3], [2, 3]];
@@ -193,9 +200,10 @@ function main(){
 			let f = [0, 0, 0];
 			let m = map(Math.random(), [0, 1], [1, 3]);
 			let s = map(Math.random(), [0, 1], [50, 150]);
+			let l = 0;
 			let shade = map(Math.random(), [0, 1], [.5, .7]);
 			let c = [shade, shade, shade + map(Math.random(), [0, 1], [.25, .5])];
-			return p.concat(v, f, m, s, c);
+			return p.concat(v, f, m, s, l, c);
 		}
 	}
 

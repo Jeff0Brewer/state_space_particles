@@ -4,8 +4,9 @@ IND = { // px, py, pz, vx, vy, vz, fx, fy, fz, m
 	FOR: 6, //force
 	MAS: 9, //mass
 	SIZ: 10, //size
-	COL: 11, //color
-	FPP: 15 //floats per particle
+	LIF: 11, //lifetime
+	COL: 12, //color
+	FPP: 16 //floats per particle
 }
 APRX_0 = [0, 0, .00000000000001];
 FPV = 8;
@@ -64,6 +65,7 @@ function PartSys(num, F, C, init){
 				sdot[n*IND.FPP + IND.VEL + i] = acc[i];
 				sdot[n*IND.FPP + IND.POS + i] = s[n*IND.FPP + IND.VEL + i];
 			}
+			sdot[n*IND.FPP + IND.LIF] = 1.0;
 		}
 		return sdot;
 	}
