@@ -71,9 +71,9 @@ function main(){
 	let fire_bound = 3.5;
 	let fire_center = [-5, -5, 0];
 	let fire_radius = 1;
-	let fire_force = .5;
+	let fire_force = .6;
 	let fire_mass = .02;
-	let fire_size = 150;
+	let fire_size = 200;
 	let fire_life = .75;
 	let fire_map = function(val, bound){
 		let colors = [[.7, .7, .25], [1, 1, .25], [1, .5, 0], [1, 0, 0], [.5, 0, 0], [.3, .3, .3], [0, 0, 0]];
@@ -186,7 +186,7 @@ function main(){
 			new AllForcer(0, [1, 0, 0], field_num),
 			new TornadoForcer(field_center, 1.5, 1, 5, 200, 20, field_num),
 			new GravityForcer(-9.8, field_num),
-			new DragForcer(.4, field_num)
+			new DragForcer(.2, field_num)
 		],
 		C: [
 			new AxisConstraint(0, -1, -field_bound + field_center[0], .95, field_num),
@@ -426,7 +426,8 @@ set_menu_state = function(ind){
 	}
 }
 
-document.getElementById('solver_menu').onchange = function(){
+let solver_menu = document.getElementById('solver_menu');
+solver_menu.onchange = function(){
 	for(let i = 0; i < part_sys.length; i++){
 		part_sys[i].set_solver(this.value);
 	}

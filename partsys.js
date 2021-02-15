@@ -43,7 +43,9 @@ function PartSys(num, F, C, init){
 			}
 			this.s2.set(this.s1);
 		}
-		this.curr_solver = this.midpoint_i;
+		if(!this.curr_solver){
+			this.curr_solver = this.midpoint_i;
+		}
 	}
 
 	this.applyAllForces = function(s, F){
@@ -88,10 +90,11 @@ function PartSys(num, F, C, init){
 			case "I_Mid":
 				this.curr_solver = this.midpoint_i;
 				break;
+			case "V_Ver":
+				this.curr_solver = this.velocity_verlet;
+				break;
 		}
 	}
-
-	
 
 	this.euler_e = function(s1, s2, elapsed){
 		let out = new Float32Array(IND.FPP*this.num);
@@ -111,7 +114,7 @@ function PartSys(num, F, C, init){
 		return out;
 	}
 
-	this.euler_i = function(s1, s2, elapsed, explicit_solver){
+	this.euler_i = function(s1, s2, elapsed){
 		let out = new Float32Array(IND.FPP*this.num);
 		let s2_0 = this.euler_e(s1, s2, elapsed);
 		let s3_0 = this.euler_e(s2_0, s2, -elapsed);
@@ -121,12 +124,38 @@ function PartSys(num, F, C, init){
 		return out;
 	}
 
-	this.midpoint_i = function(s1, s2, elapsed, explicit_solver){
+	this.midpoint_i = function(s1, s2, elapsed){
 		let out = new Float32Array(IND.FPP*this.num);
 		let s2_0 = this.midpoint_e(s1, s2, elapsed);
 		let s3_0 = this.midpoint_e(s2_0, s2, -elapsed);
 		for(let i = 0; i < out.length; i++){
 			out[i] = s2_0[i] - .5*(s1[i] - s3_0[i]);
+		}
+		return out;
+	}
+
+	this.velocity_verlet = function(s1, s2, elapsed){
+		let out = s2.slice();
+		let h = elapsed/1000;
+		let s1dot = this.dotFinder(s1);
+		for(let n = 0; n < this.num; n++){
+			let s1_p = s1.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
+			let s1_v = s1dot.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
+			let s1_acc = s1dot.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);
+			for(let j = 0; j < 3; j++){
+				out[n*IND.FPP + IND.POS + j] = s1_p[j] + s1_v[j]*h + s1_acc[j]*.5*h*h;
+			}
+		}
+		this.applyAllForces(out, this.F);
+		let s2dot = this.dotFinder(out);
+		for(let n = 0; n < this.num; n++){
+			let s1_v = s1dot.slice(n*IND.FPP + IND.POS, n*IND.FPP + IND.POS + 3);
+			let s1_acc = s1dot.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);;
+			let s2_acc = s2dot.slice(n*IND.FPP + IND.VEL, n*IND.FPP + IND.VEL + 3);;
+			for(let j = 0; j < 3; j++){
+				out[n*IND.FPP + IND.VEL + j] = s1_v[j] + (s2_acc[j] + s1_acc[j])*.5*h;
+			}
+			out[n*IND.FPP + IND.LIF] = s1[n*IND.FPP + IND.LIF] + s2dot[n*IND.FPP + IND.LIF]*h;
 		}
 		return out;
 	}
